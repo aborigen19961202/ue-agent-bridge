@@ -3,7 +3,7 @@ param(
   [string]$ProjectRoot,
   [Parameter(Mandatory = $true)]
   [string]$ProjectName,
-  [string]$EngineRoot = "E:\UnrealEngine\UE_5.7",
+  [string]$EngineRoot = "",
   [string]$TargetName,
   [string]$Platform = "Win64",
   [string]$Configuration = "Development",
@@ -12,6 +12,25 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# Auto-detect engine root from Epic Games registry if not provided
+if (-not $EngineRoot) {
+  $registryBase = "HKLM:\SOFTWARE\EpicGames\Unreal Engine"
+  if (Test-Path $registryBase) {
+    $versions = Get-ChildItem $registryBase | Sort-Object Name -Descending
+    foreach ($ver in $versions) {
+      $candidate = (Get-ItemProperty $ver.PSPath -ErrorAction SilentlyContinue).InstalledDirectory
+      if ($candidate -and (Test-Path (Join-Path $candidate "Engine\Build\BatchFiles\Build.bat"))) {
+        $EngineRoot = $candidate
+        Write-Host "Auto-detected Unreal Engine at: $EngineRoot"
+        break
+      }
+    }
+  }
+  if (-not $EngineRoot) {
+    throw "Could not auto-detect Unreal Engine installation. Pass -EngineRoot explicitly, e.g. -EngineRoot 'C:\Program Files\Epic Games\UE_5.5'"
+  }
+}
 
 $projectRootResolved = (Resolve-Path $ProjectRoot).Path
 $uproject = Join-Path $projectRootResolved "$ProjectName.uproject"
@@ -58,13 +77,7 @@ $arguments = @(
   "-NoHotReloadFromIDE"
 )
 
-$quotedCommand = @(
-  "&",
-  "'$buildBat'"
-) + ($arguments | ForEach-Object { "'$_'" })
-
-$commandText = $quotedCommand -join " "
-$rawOutput = Invoke-Expression $commandText 2>&1 | ForEach-Object { $_.ToString() }
+$rawOutput = & $buildBat @arguments 2>&1 | ForEach-Object { $_.ToString() }
 $buildExitCode = $LASTEXITCODE
 $joinedOutput = ($rawOutput -join [Environment]::NewLine)
 $joinedOutput | Set-Content -Path $rawLogPath -Encoding UTF8

@@ -4,7 +4,7 @@ const pluginHost = process.env.UE_PLUGIN_HOST ?? "127.0.0.1";
 const pluginPort = process.env.UE_PLUGIN_PORT ?? "30110";
 const rcHost = process.env.UE_RC_HOST ?? "127.0.0.1";
 const rcPort = process.env.UE_RC_PORT ?? "30010";
-const timeoutMs = Math.max(Number.parseInt(process.env.UE_REQUEST_TIMEOUT_MS ?? "5000", 10), 30000);
+const timeoutMs = Number.parseInt(process.env.UE_REQUEST_TIMEOUT_MS ?? "5000", 10);
 
 const backend = new PluginBackend({
   baseUrl: `http://${pluginHost}:${pluginPort}`,
