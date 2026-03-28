@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "private": true,
   "license": "MIT",
-  "description": "Plugin, bridge, and skills that give coding agents eyes and hands in Unreal Engine while reducing token-heavy guesswork",
+  "description": "Give coding agents eyes and hands in Unreal Engine with a plugin, MCP bridge, and skills built to cut token-heavy guesswork",
   "keywords": [
     "unreal-engine",
     "mcp",

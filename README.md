@@ -1,10 +1,10 @@
 # UE_AgentBridge
 
-`UE_AgentBridge` is a package of Unreal tooling for coding agents: the Unreal plugin, the MCP bridge, and the companion agent skills that teach tools like Codex and Claude how to work with Unreal sanely.
+`UE_AgentBridge` gives coding agents eyes and hands in Unreal Engine.
 
-The goal is simple: give the agent eyes and hands inside Unreal Engine without moving your whole development workflow into Unreal.
+It combines an Unreal plugin, an MCP bridge, and companion agent skills so tools like Codex and Claude can look inside a live Unreal Editor session, understand what is actually happening, and perform a small set of safe actions.
 
-In practice, that means the agent can see real editor state, inspect actors, read logs, frame the viewport, capture screenshots, and perform a small set of safe actions, while code edits, builds, git, and project reasoning stay in the normal repo workflow.
+The point is to stop wasting time and tokens on guesswork. Instead of making the model infer Unreal state from code alone, `UE_AgentBridge` lets it ask the editor directly while code edits, builds, and git stay in the normal repo workflow.
 
 This project is plugin-first:
 
@@ -14,17 +14,13 @@ This project is plugin-first:
 - `remote-control` fallback for asset search and explicit property reads/writes
 - `mock` mode for local validation without Unreal
 
-## What It Does
+## Why It Exists
 
-It is built around one problem: AI agents are good at editing code, but they are weak when they have to guess what is actually happening inside Unreal Editor.
+AI agents can write and change Unreal code, but they usually cannot see what Unreal Editor is doing right now.
 
-`UE_AgentBridge` fixes that by combining:
+This project fixes that gap.
 
-- a reusable Unreal plugin that exposes live editor state
-- an MCP bridge that turns that state into tools an agent can call
-- agent skills and usage guidance so the model uses those tools efficiently instead of wandering
-
-With that stack in place, an external agent can:
+With `UE_AgentBridge`, an external agent can:
 
 - check whether the editor is ready and connected
 - inspect selected actors, level actors, and object properties
@@ -35,11 +31,10 @@ With that stack in place, an external agent can:
 - check Live Coding readiness and trigger a safe reload path
 - run only a small allowlisted set of safe console actions
 
-Just as important, this also helps reduce wasted tokens:
+That helps in two ways:
 
-- the agent can query structured editor state instead of guessing from code alone
-- it can capture the exact screenshot or log slice it needs instead of repeatedly asking for more context
-- the skills steer the agent toward the shortest useful workflow, which cuts down trial-and-error loops
+- the agent can query real editor state instead of guessing from code alone
+- it can pull the exact screenshot, actor state, or log slice it needs instead of burning tokens on back-and-forth trial and error
 
 What stays outside Unreal on purpose:
 
@@ -49,7 +44,7 @@ What stays outside Unreal on purpose:
 - shell and build command execution
 - architecture and code reasoning
 
-That separation is part of the mission too: Unreal provides the eyes and hands, while the repository stays the source of truth for code work. That keeps the workflow safer, clearer, and cheaper in tokens than letting the model stumble around blindly.
+Unreal provides the eyes and hands. The repository stays the source of truth for code work. That split is what makes the workflow safer, clearer, and cheaper in tokens.
 
 ## Install
 
