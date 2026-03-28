@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "private": true,
   "license": "MIT",
-  "description": "Let Codex and Claude inspect and operate a live Unreal Editor without moving code work into Unreal",
+  "description": "Plugin, bridge, and skills that give coding agents eyes and hands in Unreal Engine while reducing token-heavy guesswork",
   "keywords": [
     "unreal-engine",
     "mcp",
