@@ -3,15 +3,34 @@ import {
   AssetSearchInput,
   AssetSummary,
   ConsoleCommandResult,
+  DebugDrawStateResult,
+  DestroyActorInput,
+  DestroyActorResult,
+  EditorDiagnostic,
+  EditorState,
+  FrameActorInput,
+  FrameActorResult,
+  GetDebugDrawStateInput,
+  GetEditorDiagnosticsInput,
   GetLevelActorsInput,
   GetOutputLogInput,
   GetPropertyInput,
   HealthcheckResult,
+  LiveCodingStatus,
   OutputLogEntry,
   PropertyReadResult,
   PropertyWriteResult,
   RunConsoleCommandInput,
-  SetPropertyInput
+  SelectActorInput,
+  SelectActorResult,
+  SetViewportCameraInput,
+  SetPropertyInput,
+  SpawnActorInput,
+  SpawnActorResult,
+  TriggerLiveCodingBuildResult,
+  ViewportCameraState,
+  ViewportScreenshotInput,
+  ViewportScreenshotResult
 } from "../types/domain.js";
 import { BridgeError } from "../utils/errors.js";
 import { assertWritablePropertyInput } from "./property-write-policy.js";
@@ -398,6 +417,81 @@ export class RemoteControlBackend implements UnrealBackend {
     }
 
     return normalizeConsoleCommandHelperResponse(response.data, command.commandId);
+  }
+
+  public async getEditorDiagnostics(_input: GetEditorDiagnosticsInput): Promise<EditorDiagnostic[]> {
+    throw new BridgeError(
+      "NOT_IMPLEMENTED",
+      "ue_get_editor_diagnostics is available only through the plugin backend."
+    );
+  }
+
+  public async getEditorState(): Promise<EditorState> {
+    throw new BridgeError(
+      "NOT_IMPLEMENTED",
+      "ue_get_editor_state is available only through the plugin backend."
+    );
+  }
+
+  public async getViewportScreenshot(_input: ViewportScreenshotInput): Promise<ViewportScreenshotResult> {
+    throw new BridgeError(
+      "NOT_IMPLEMENTED",
+      "ue_get_viewport_screenshot is available only through the plugin backend."
+    );
+  }
+
+  public async getViewportCamera(): Promise<ViewportCameraState> {
+    throw new BridgeError(
+      "NOT_IMPLEMENTED",
+      "ue_get_viewport_camera is available only through the plugin backend."
+    );
+  }
+
+  public async setViewportCamera(_input: SetViewportCameraInput): Promise<ViewportCameraState> {
+    throw new BridgeError(
+      "NOT_IMPLEMENTED",
+      "ue_set_viewport_camera is available only through the plugin backend."
+    );
+  }
+
+  public async spawnActor(_input: SpawnActorInput): Promise<SpawnActorResult> {
+    throw stubbedCallError("ue_spawn_actor_safe");
+  }
+
+  public async selectActor(_input: SelectActorInput): Promise<SelectActorResult> {
+    throw stubbedCallError("ue_select_actor_safe");
+  }
+
+  public async destroyActor(_input: DestroyActorInput): Promise<DestroyActorResult> {
+    throw stubbedCallError("ue_destroy_actor_safe");
+  }
+
+  public async frameActor(_input: FrameActorInput): Promise<FrameActorResult> {
+    throw new BridgeError(
+      "NOT_IMPLEMENTED",
+      "ue_frame_actor is available only through the plugin backend."
+    );
+  }
+
+  public async getDebugDrawState(_input: GetDebugDrawStateInput): Promise<DebugDrawStateResult> {
+    throw new BridgeError(
+      "NOT_IMPLEMENTED",
+      "ue_get_debug_draw_state is available only through the plugin backend."
+    );
+  }
+
+  public async getLiveCodingStatus(): Promise<LiveCodingStatus> {
+    throw new BridgeError(
+      "NOT_IMPLEMENTED",
+      "ue_get_live_coding_status is available only through the plugin backend."
+    );
+  }
+
+  public async triggerLiveCodingBuild(): Promise<TriggerLiveCodingBuildResult> {
+    throw new BridgeError(
+      "NOT_IMPLEMENTED",
+      "ue_trigger_live_coding_build_safe is available only through the plugin backend."
+    );
   }
 
   private async checkPresetReadiness(presetRoutesAvailable: boolean): Promise<PresetReadiness> {

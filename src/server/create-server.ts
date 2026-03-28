@@ -12,7 +12,7 @@ export function createServer(config: AppConfig, backend: UnrealBackend, logger: 
   const server = new Server(
     {
       name: "ue-agentbridge",
-      version: "0.1.0"
+      version: "0.3.0"
     },
     {
       capabilities: {
@@ -47,7 +47,7 @@ export function createServer(config: AppConfig, backend: UnrealBackend, logger: 
       });
 
       const result = await definition.run(backend, args);
-      return jsonResponse(result);
+      return definition.formatResult ? definition.formatResult(result, args) : jsonResponse(result);
     } catch (error) {
       logger.error("Tool failed", {
         tool: definition.name,

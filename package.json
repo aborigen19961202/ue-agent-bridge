@@ -1,8 +1,8 @@
 {
   "name": "ue-agent-bridge",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
-  "description": "Narrow M0 Unreal Engine agent bridge for external coding agents",
+  "description": "Plugin-first Unreal Engine agent bridge for external coding agents",
   "type": "module",
   "engines": {
     "node": ">=20.0.0"
@@ -10,16 +10,22 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/server/index.ts",
+    "parse:build-log": "node scripts/parse-ue-build-log.mjs",
+    "package:plugin": "powershell -ExecutionPolicy Bypass -File .\\scripts\\package-ue-plugin.ps1",
+    "smoke:plugin": "node scripts/smoke-plugin-mode.mjs",
     "start": "node dist/server/index.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.27.1",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "@types/pngjs": "^6.0.5",
     "tsx": "^4.20.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.4"

@@ -1,30 +1,43 @@
 # CLAUDE.md
 
-This repository is for a reusable Unreal Engine bridge that supports external coding agents. Keep repository reasoning outside Unreal. Use Unreal through structured bridge tools, not as the main place where work happens.
+Use [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md) as the main operating guide for this repository.
 
-## Operating Rules
+This bridge exists so Claude Code can stay repo-aware outside Unreal while using Unreal Editor as a bounded tool layer.
 
-- stay in repo, file, git, and terminal workflows for source-level work
-- use Unreal only through controlled bridge tools when editor state matters
-- treat Unreal as a first-class external tool layer, not as a fallback and not as a repo mirror
-- prefer safe read operations before write operations
-- narrow the target before making any editor change
+## Working Stance
 
-## Use Unreal Tools For
+- keep code edits, shell, builds, git, and architecture reasoning outside Unreal
+- use the Unreal bridge only when live editor state matters
+- prefer `plugin` mode over legacy `remote-control` mode
+- start Unreal-dependent work with `ue_healthcheck`
 
-- current selection
-- current level actors
-- live property reads
-- narrow property writes
-- asset search
-- recent output log inspection
-- safe diagnostic console commands
+## Practical Defaults
 
-## Be Careful With
+- for C++ work, build outside Unreal with `scripts/run-ue-build.ps1`
+- if that build fails, trust the parsed JSON build diagnostics first
+- if that build succeeds and Unreal is open, use Live Coding through:
+  - `ue_get_live_coding_status`
+  - `ue_trigger_live_coding_build_safe`
+- for live editor inspection, use:
+  - `ue_get_selected_actors`
+  - `ue_get_level_actors`
+  - `ue_get_property`
+  - `ue_get_output_log`
+  - `ue_get_editor_diagnostics`
+  - `ue_get_editor_state`
+  - `ue_get_viewport_camera` when framing matters
+  - `ue_set_viewport_camera` only for bounded viewport navigation
+  - `ue_frame_actor` or `ue_capture_actor_screenshot` for small, distant, or off-screen subjects
+  - `ue_get_viewport_screenshot` when viewport visibility is the actual question
+  - `ue_get_debug_draw_state` when validating `DrawDebugLine` or other debug geometry
+  - `ue_compare_viewport_screenshot` when a reference image provides a clearer visual verdict
 
-- broad mutations
-- destructive actions
-- commands that affect many actors or assets
-- anything resembling arbitrary execution inside Unreal
+## Safety
 
-If a requested action falls outside the bridge's explicit tool surface, do not silently escalate to a more powerful Unreal-side mechanism. Keep the boundary clear and controlled.
+- prefer reads before writes
+- keep mutations narrow and explicit
+- do not use raw console commands
+- do not invent broader Unreal-side execution paths
+- do not treat Unreal as a repo mirror
+
+If Unreal readiness is missing, report that clearly and fall back to repo-only work when possible.

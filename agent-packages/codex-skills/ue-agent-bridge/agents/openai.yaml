@@ -1,0 +1,4 @@
+interface:
+  display_name: "UE Agent Bridge"
+  short_description: "Operate Unreal safely through the bridge."
+  default_prompt: "Use $ue-agent-bridge to work with Unreal through UE Agent Bridge while keeping code, builds, and repo reasoning outside Unreal. When a question is visual or depends on viewport output, use ue_get_viewport_screenshot instead of guessing from code."

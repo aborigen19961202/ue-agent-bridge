@@ -1,0 +1,22 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "0.3.0",
+  "FriendlyName": "UE Agent Bridge",
+  "Description": "Localhost Unreal Editor backend for external coding agents using UE Agent Bridge.",
+  "Category": "Tools",
+  "CreatedBy": "UE Agent Bridge Contributors",
+  "CanContainContent": false,
+  "EnabledByDefault": true,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "UEAgentBridge",
+      "Type": "Editor",
+      "LoadingPhase": "PostEngineInit"
+    }
+  ],
+  "SupportedTargetPlatforms": [
+    "Win64"
+  ]
+}

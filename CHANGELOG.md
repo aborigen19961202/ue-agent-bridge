@@ -1,5 +1,49 @@
 # Changelog
 
+## 0.2.0 - Plugin-First Bridge
+
+Plugin-first release of `UE_AgentBridge`.
+
+### Added
+
+- Unreal project plugin package under [`unreal-plugin/UEAgentBridge`](./unreal-plugin/UEAgentBridge)
+- `plugin` backend mode in the TypeScript bridge
+- distributable plugin packaging script at [`scripts/package-ue-plugin.ps1`](./scripts/package-ue-plugin.ps1)
+- third-party install and Fab readiness docs:
+  - [`THIRD_PARTY_INSTALL.md`](./THIRD_PARTY_INSTALL.md)
+  - [`FAB_RELEASE_READINESS.md`](./FAB_RELEASE_READINESS.md)
+- plugin-owned endpoints for:
+  - `ue_healthcheck`
+  - `ue_get_selected_actors`
+  - `ue_get_level_actors`
+  - `ue_get_output_log`
+  - `ue_get_editor_diagnostics`
+  - `ue_get_editor_state`
+  - `ue_get_live_coding_status`
+  - `ue_trigger_live_coding_build_safe`
+  - `ue_run_console_command_safe`
+- live coding status and safe build trigger support
+- bounded editor diagnostics snapshot
+- plugin backend tests
+
+### Architectural Decisions
+
+- plugin mode is now the preferred integration path
+- manual Remote Control preset setup is no longer the normal workflow
+- Remote Control remains as a bounded fallback for:
+  - `ue_asset_search`
+  - `ue_get_property`
+  - `ue_set_property`
+- build orchestration stays outside Unreal
+- Live Coding is exposed only through a narrow readiness/status/build surface
+
+### Validation Surface
+
+- typecheck, tests, and build pass for the TypeScript bridge
+- `CleanModelFactoryEditor` build succeeded with the installed `UEAgentBridge` plugin
+- live Unreal validation passed for plugin mode on the current local `CleanModelFactory` editor session
+- packaged plugin zip install was validated by reinstalling into `CleanModelFactory`, rebuilding, restarting the editor, and rerunning plugin smoke validation
+
 ## 0.1.0 - M0
 
 Initial M0 release of `UE_AgentBridge`.

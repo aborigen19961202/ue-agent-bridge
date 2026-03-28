@@ -3,11 +3,16 @@ export type ErrorCode =
   | "VALIDATION_ERROR"
   | "BACKEND_ERROR"
   | "NOT_IMPLEMENTED"
+  | "NOT_SUPPORTED"
   | "UNSAFE_COMMAND"
+  | "UNSAFE_MUTATION"
   | "HELPER_UNAVAILABLE"
   | "NOT_FOUND"
   | "NOT_WRITABLE"
-  | "INVALID_VALUE";
+  | "INVALID_VALUE"
+  | "EDITOR_UNAVAILABLE"
+  | "LIMIT_EXCEEDED"
+  | "INTERNAL_ERROR";
 
 export class BridgeError extends Error {
   public readonly code: ErrorCode;

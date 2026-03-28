@@ -1,0 +1,9 @@
+{
+  "ue-agent-bridge": {
+    "command": "cmd",
+    "args": [
+      "/c",
+      ".\\scripts\\start-ue-agent-bridge.cmd"
+    ]
+  }
+}

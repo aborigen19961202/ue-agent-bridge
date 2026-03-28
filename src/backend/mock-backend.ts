@@ -3,15 +3,33 @@ import {
   AssetSearchInput,
   AssetSummary,
   ConsoleCommandResult,
+  DebugDrawStateResult,
+  DestroyActorInput,
+  DestroyActorResult,
+  EditorDiagnostic,
+  EditorState,
+  FrameActorInput,
+  FrameActorResult,
+  GetDebugDrawStateInput,
+  GetEditorDiagnosticsInput,
   GetLevelActorsInput,
   GetOutputLogInput,
   GetPropertyInput,
   HealthcheckResult,
+  LiveCodingStatus,
   OutputLogEntry,
   PropertyReadResult,
   PropertyWriteResult,
   RunConsoleCommandInput,
-  SetPropertyInput
+  SelectActorInput,
+  SelectActorResult,
+  SetViewportCameraInput,
+  SetPropertyInput,
+  SpawnActorInput,
+  SpawnActorResult,
+  ViewportCameraState,
+  ViewportScreenshotInput,
+  ViewportScreenshotResult
 } from "../types/domain.js";
 import { BridgeError } from "../utils/errors.js";
 import { resolveSafeConsoleCommand } from "../tools/console-command-policy.js";
@@ -98,6 +116,67 @@ const MOCK_LOGS: OutputLogEntry[] = [
   }
 ];
 
+const MOCK_DIAGNOSTICS: EditorDiagnostic[] = [
+  {
+    source: "OutputLog",
+    severity: "Warning",
+    category: "LogLighting",
+    message: "PointLight_01 exceeds recommended stationary overlap count."
+  },
+  {
+    source: "LiveCoding",
+    severity: "Error",
+    category: "LogLiveCoding",
+    message: "Compile warning promoted to error in mock environment.",
+    filePath: "Source/CleanModelFactory/CleanModelFactory.cpp",
+    line: 12,
+    column: 3
+  }
+];
+
+const MOCK_VIEWPORT_PNG_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jk6cAAAAASUVORK5CYII=";
+
+const MOCK_DEBUG_DRAW_STATE: DebugDrawStateResult = {
+  capturedAt: "2026-03-11T10:05:03Z",
+  projectName: "MockProject",
+  currentMap: "/Game/Maps/TestMap",
+  lines: [
+    {
+      batcher: "world_persistent",
+      start: { x: 0, y: 0, z: 0 },
+      end: { x: 100, y: 0, z: 50 },
+      color: { r: 1, g: 0, b: 0, a: 1 },
+      thickness: 2,
+      remainingLifeTime: 5,
+      depthPriority: 0,
+      batchId: 42,
+      length: 111.80339887498948
+    }
+  ],
+  points: [
+    {
+      batcher: "foreground",
+      position: { x: 100, y: 0, z: 50 },
+      color: { r: 0, g: 1, b: 0, a: 1 },
+      pointSize: 8,
+      remainingLifeTime: 3,
+      depthPriority: 1,
+      batchId: 77
+    }
+  ],
+  summary: {
+    totalLines: 1,
+    totalPoints: 1,
+    sampledLines: 1,
+    sampledPoints: 1,
+    batchers: {
+      world_persistent: { lines: 1, points: 0 },
+      foreground: { lines: 0, points: 1 }
+    }
+  }
+};
+
 const LOG_LEVEL_ORDER = {
   Verbose: 10,
   Log: 20,
@@ -111,11 +190,16 @@ export class MockUnrealBackend implements UnrealBackend {
   private readonly actors: MockActorRecord[];
   private readonly assets: AssetSummary[];
   private readonly logs: OutputLogEntry[];
+  private viewportCamera: ViewportCameraState["camera"];
 
   public constructor() {
     this.actors = structuredClone(MOCK_ACTORS);
     this.assets = structuredClone(MOCK_ASSETS);
     this.logs = structuredClone(MOCK_LOGS);
+    this.viewportCamera = {
+      location: { x: 0, y: 0, z: 150 },
+      rotation: { pitch: -15, yaw: 45, roll: 0 }
+    };
   }
 
   public async healthcheck(): Promise<HealthcheckResult> {
@@ -133,6 +217,19 @@ export class MockUnrealBackend implements UnrealBackend {
         "ue_set_property",
         "ue_asset_search",
         "ue_get_output_log",
+        "ue_get_editor_diagnostics",
+        "ue_get_editor_state",
+        "ue_get_viewport_camera",
+        "ue_set_viewport_camera",
+        "ue_spawn_actor_safe",
+        "ue_select_actor_safe",
+        "ue_destroy_actor_safe",
+        "ue_frame_actor",
+        "ue_get_viewport_screenshot",
+        "ue_capture_actor_screenshot",
+        "ue_get_debug_draw_state",
+        "ue_get_live_coding_status",
+        "ue_trigger_live_coding_build_safe",
         "ue_run_console_command_safe"
       ],
       readiness: {
@@ -229,6 +326,205 @@ export class MockUnrealBackend implements UnrealBackend {
       .slice(-(input.limit ?? 50));
   }
 
+  public async getEditorDiagnostics(input: GetEditorDiagnosticsInput): Promise<EditorDiagnostic[]> {
+    const threshold = diagnosticSeverityRank(input.minSeverity ?? "Info");
+
+    return MOCK_DIAGNOSTICS
+      .filter((entry) => diagnosticSeverityRank(entry.severity) >= threshold)
+      .slice(-(input.limit ?? 50))
+      .map((entry) => structuredClone(entry));
+  }
+
+  public async getEditorState(): Promise<EditorState> {
+    return {
+      projectName: "MockProject",
+      currentMap: "/Game/Maps/TestMap",
+      pieActive: false,
+      liveCoding: await this.getLiveCodingStatus(),
+      capabilityReadiness: {
+        ue_get_selected_actors: true,
+        ue_get_level_actors: true,
+        ue_get_output_log: true,
+        ue_get_editor_diagnostics: true,
+        ue_get_editor_state: true,
+        ue_get_viewport_camera: true,
+        ue_set_viewport_camera: true,
+        ue_spawn_actor_safe: true,
+        ue_select_actor_safe: true,
+        ue_destroy_actor_safe: true,
+        ue_frame_actor: true,
+        ue_get_viewport_screenshot: true,
+        ue_capture_actor_screenshot: true,
+        ue_get_debug_draw_state: true,
+        ue_get_live_coding_status: true,
+        ue_trigger_live_coding_build_safe: true,
+        ue_run_console_command_safe: true
+      }
+    };
+  }
+
+  public async getViewportScreenshot(_input: ViewportScreenshotInput): Promise<ViewportScreenshotResult> {
+    return {
+      ...this.buildViewportCameraState(),
+      mimeType: "image/png",
+      dataBase64: MOCK_VIEWPORT_PNG_BASE64,
+      width: 1,
+      height: 1,
+      viewport: {
+        ...this.buildViewportCameraState().viewport,
+        width: 1,
+        height: 1
+      }
+    };
+  }
+
+  public async getViewportCamera(): Promise<ViewportCameraState> {
+    return this.buildViewportCameraState();
+  }
+
+  public async setViewportCamera(input: SetViewportCameraInput): Promise<ViewportCameraState> {
+    this.viewportCamera = structuredClone({
+      location: input.location,
+      rotation: input.rotation
+    });
+
+    return this.buildViewportCameraState();
+  }
+
+  public async spawnActor(input: SpawnActorInput): Promise<SpawnActorResult> {
+    const className = normalizeMockSpawnClass(input);
+    const actorLabel = input.label?.trim() || `${className}_${String(this.actors.length + 1).padStart(2, "0")}`;
+    const actorName = makeUniqueActorName(actorLabel, this.actors);
+    const actor: MockActorRecord = {
+      actorLabel,
+      actorName,
+      className,
+      objectPath: `/Game/Maps/TestMap.TestMap:PersistentLevel.${actorName}`,
+      selected: input.selectAfterSpawn ?? false,
+      properties: {
+        RelativeLocation: structuredClone(input.location),
+        RelativeRotation: structuredClone(input.rotation),
+        HiddenInGame: false
+      }
+    };
+
+    if (input.selectAfterSpawn) {
+      clearSelected(this.actors);
+    }
+
+    this.actors.push(actor);
+
+    return {
+      ...stripActorProperties(actor),
+      location: structuredClone(input.location),
+      rotation: structuredClone(input.rotation)
+    };
+  }
+
+  public async selectActor(input: SelectActorInput): Promise<SelectActorResult> {
+    const actor = this.findActor({
+      target: input.target,
+      propertyName: "RelativeLocation"
+    });
+
+    clearSelected(this.actors);
+    actor.selected = true;
+
+    return {
+      ...stripActorProperties(actor),
+      selected: true
+    };
+  }
+
+  public async destroyActor(input: DestroyActorInput): Promise<DestroyActorResult> {
+    const actor = this.findActor({
+      target: input.target,
+      propertyName: "RelativeLocation"
+    });
+    const actorIndex = this.actors.findIndex((candidate) => candidate.objectPath === actor.objectPath);
+
+    if (actorIndex < 0) {
+      throw new BridgeError("NOT_FOUND", "Target actor not found.");
+    }
+
+    const snapshot = stripActorProperties(actor);
+    this.actors.splice(actorIndex, 1);
+
+    return {
+      ...snapshot,
+      destroyed: true
+    };
+  }
+
+  public async frameActor(input: FrameActorInput): Promise<FrameActorResult> {
+    const actor = this.findActor({
+      target: input.target,
+      propertyName: "RelativeLocation"
+    });
+    const relativeLocation = actor.properties.RelativeLocation;
+    const actorLocation = isVector3(relativeLocation)
+      ? relativeLocation
+      : { x: 0, y: 0, z: 0 };
+
+    this.viewportCamera = {
+      location: {
+        x: actorLocation.x + 600,
+        y: actorLocation.y - 600,
+        z: actorLocation.z + 400
+      },
+      rotation: {
+        pitch: -20,
+        yaw: 135,
+        roll: 0
+      }
+    };
+
+    return {
+      ...this.buildViewportCameraState(),
+      target: stripActorProperties(actor),
+      activeViewportOnly: input.activeViewportOnly ?? true
+    };
+  }
+
+  public async getDebugDrawState(input: GetDebugDrawStateInput): Promise<DebugDrawStateResult> {
+    const points = input.includePoints === false ? [] : structuredClone(MOCK_DEBUG_DRAW_STATE.points);
+
+    return {
+      ...structuredClone(MOCK_DEBUG_DRAW_STATE),
+      lines: structuredClone(MOCK_DEBUG_DRAW_STATE.lines).slice(0, input.limit ?? 50),
+      points,
+      summary: {
+        ...structuredClone(MOCK_DEBUG_DRAW_STATE.summary),
+        sampledLines: Math.min(MOCK_DEBUG_DRAW_STATE.lines.length, input.limit ?? 50),
+        sampledPoints: points.length
+      }
+    };
+  }
+
+  public async getLiveCodingStatus(): Promise<LiveCodingStatus> {
+    return {
+      available: true,
+      enabled: true,
+      busy: false,
+      lastResult: "success",
+      message: "Mock Live Coding is ready."
+    };
+  }
+
+  public async triggerLiveCodingBuild() {
+    this.logs.push({
+      timestamp: new Date().toISOString(),
+      level: "Display",
+      category: "LogLiveCoding",
+      message: "Mock Live Coding compile triggered."
+    });
+
+    return {
+      accepted: true,
+      status: await this.getLiveCodingStatus()
+    };
+  }
+
   public async runConsoleCommand(input: RunConsoleCommandInput): Promise<ConsoleCommandResult> {
     const command = resolveSafeConsoleCommand(input.commandId);
 
@@ -266,6 +562,24 @@ export class MockUnrealBackend implements UnrealBackend {
 
     return actor;
   }
+
+  private buildViewportCameraState(): ViewportCameraState {
+    return {
+      capturedAt: "2026-03-11T10:05:00Z",
+      source: "active_viewport",
+      projectName: "MockProject",
+      currentMap: "/Game/Maps/TestMap",
+      pieActive: false,
+      viewport: {
+        type: "perspective",
+        viewMode: "lit",
+        realtime: true,
+        width: 1,
+        height: 1
+      },
+      camera: structuredClone(this.viewportCamera)
+    };
+  }
 }
 
 function stripActorProperties(actor: MockActorRecord): ActorSummary {
@@ -288,4 +602,82 @@ function matchesActorFilter(actor: ActorSummary, input: GetLevelActorsInput): bo
   }
 
   return true;
+}
+
+function diagnosticSeverityRank(severity: EditorDiagnostic["severity"]): number {
+  switch (severity) {
+    case "Info":
+      return 10;
+    case "Warning":
+      return 20;
+    case "Error":
+      return 30;
+  }
+}
+
+function isVector3(value: unknown): value is { x: number; y: number; z: number } {
+  return typeof value === "object"
+    && value !== null
+    && typeof (value as { x?: unknown }).x === "number"
+    && typeof (value as { y?: unknown }).y === "number"
+    && typeof (value as { z?: unknown }).z === "number";
+}
+
+function clearSelected(actors: MockActorRecord[]): void {
+  for (const actor of actors) {
+    actor.selected = false;
+  }
+}
+
+function normalizeMockSpawnClass(input: SpawnActorInput): string {
+  const allowlistedByName = new Set([
+    "StaticMeshActor",
+    "PointLight",
+    "SpotLight",
+    "DirectionalLight",
+    "SkyLight",
+    "CameraActor",
+    "PlayerStart",
+    "TargetPoint",
+    "TriggerBox"
+  ]);
+  const allowlistedByPath = new Map([
+    ["/Script/Engine.StaticMeshActor", "StaticMeshActor"],
+    ["/Script/Engine.PointLight", "PointLight"],
+    ["/Script/Engine.SpotLight", "SpotLight"],
+    ["/Script/Engine.DirectionalLight", "DirectionalLight"],
+    ["/Script/Engine.SkyLight", "SkyLight"],
+    ["/Script/Engine.CameraActor", "CameraActor"],
+    ["/Script/Engine.PlayerStart", "PlayerStart"],
+    ["/Script/Engine.TargetPoint", "TargetPoint"],
+    ["/Script/Engine.TriggerBox", "TriggerBox"]
+  ]);
+
+  if (input.classPath) {
+    const resolved = allowlistedByPath.get(input.classPath);
+    if (!resolved) {
+      throw new BridgeError("UNSAFE_MUTATION", `classPath is not allowlisted for spawn-safe: ${input.classPath}`);
+    }
+
+    return resolved;
+  }
+
+  if (input.className && allowlistedByName.has(input.className)) {
+    return input.className;
+  }
+
+  throw new BridgeError("UNSAFE_MUTATION", `className is not allowlisted for spawn-safe: ${input.className ?? "<empty>"}`);
+}
+
+function makeUniqueActorName(label: string, actors: MockActorRecord[]): string {
+  const sanitized = label.replace(/[^A-Za-z0-9_]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "") || "Actor";
+  let candidate = sanitized;
+  let suffix = 1;
+
+  while (actors.some((actor) => actor.actorName === candidate)) {
+    suffix += 1;
+    candidate = `${sanitized}_${suffix}`;
+  }
+
+  return candidate;
 }

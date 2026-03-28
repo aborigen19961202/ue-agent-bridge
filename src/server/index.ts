@@ -7,15 +7,40 @@ import { toErrorMessage } from "../utils/errors.js";
 async function main(): Promise<void> {
   const config = loadConfig();
   const logger = new Logger(config.logLevel);
+  installProcessHygiene(logger);
   const backend = createBackend(config);
   const server = createServer(config, backend, logger);
 
   logger.info("Starting UE_AgentBridge", {
     backend: backend.name,
-    remoteControlUrl: config.remoteControl.baseUrl
+    remoteControlUrl: config.remoteControl.baseUrl,
+    pluginUrl: config.plugin.baseUrl
   });
 
   await startServer(server);
+}
+
+function installProcessHygiene(logger: Logger): void {
+  let shuttingDown = false;
+
+  const shutdown = (reason: string) => {
+    if (shuttingDown) {
+      return;
+    }
+
+    shuttingDown = true;
+    logger.info("Shutting down UE_AgentBridge", { reason });
+    setImmediate(() => {
+      process.exit(0);
+    });
+  };
+
+  process.stdin.on("end", () => shutdown("stdin_end"));
+  process.stdin.on("close", () => shutdown("stdin_close"));
+  process.on("disconnect", () => shutdown("ipc_disconnect"));
+  process.on("SIGTERM", () => shutdown("sigterm"));
+  process.on("SIGINT", () => shutdown("sigint"));
+  process.on("SIGHUP", () => shutdown("sighup"));
 }
 
 main().catch((error: unknown) => {
