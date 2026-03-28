@@ -6,7 +6,7 @@ This is the last-mile setup that makes Codex and Claude Code actually see `UEAge
 
 Shared launcher script:
 
-- [`scripts/start-ue-agent-bridge.cmd`](./scripts/start-ue-agent-bridge.cmd)
+- [`scripts/start-ue-agent-bridge.cmd`](../../scripts/start-ue-agent-bridge.cmd)
 
 It:
 
@@ -36,7 +36,7 @@ Claude supports project-level MCP config through `.mcp.json`.
 
 Repository-level file created in this repo:
 
-- [`.mcp.json`](./.mcp.json)
+- [`.mcp.json`](../../.mcp.json)
 
 Active project-level file installed for a live Unreal target:
 

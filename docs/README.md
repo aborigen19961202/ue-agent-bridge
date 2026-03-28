@@ -1,0 +1,47 @@
+# Documentation
+
+Project documentation is grouped by purpose instead of living in the repository root.
+
+## Guides
+
+- [AGENT_PLAYBOOK.md](./guides/AGENT_PLAYBOOK.md)
+- [CPP_ITERATION_WORKFLOW.md](./guides/CPP_ITERATION_WORKFLOW.md)
+- [PLUGIN_RUNBOOK.md](./guides/PLUGIN_RUNBOOK.md)
+- [THIRD_PARTY_INSTALL.md](./guides/THIRD_PARTY_INSTALL.md)
+- [CLIENT_INTEGRATION.md](./guides/CLIENT_INTEGRATION.md)
+
+## Integrations
+
+- [AGENT_PACKAGE_STRATEGY.md](./integrations/AGENT_PACKAGE_STRATEGY.md)
+- [AGENT_PACKAGE_INSTALL.md](./integrations/AGENT_PACKAGE_INSTALL.md)
+
+## Release
+
+- [RELEASE_CHECKLIST.md](./release/RELEASE_CHECKLIST.md)
+- [GITHUB_PUBLISH_CHECKLIST.md](./release/GITHUB_PUBLISH_CHECKLIST.md)
+- [FAB_RELEASE_READINESS.md](./release/FAB_RELEASE_READINESS.md)
+- [SAFE_MUTATION_VERIFICATION.md](./release/SAFE_MUTATION_VERIFICATION.md)
+
+## Contracts
+
+- [M1_PLUGIN_CONTRACT.md](./contracts/M1_PLUGIN_CONTRACT.md)
+- [REMOTE_CONTROL_CONTRACT.md](./contracts/REMOTE_CONTROL_CONTRACT.md)
+- [SELECTED_ACTORS_HELPER_CONTRACT.md](./contracts/SELECTED_ACTORS_HELPER_CONTRACT.md)
+- [OUTPUT_LOG_HELPER_CONTRACT.md](./contracts/OUTPUT_LOG_HELPER_CONTRACT.md)
+- [CONSOLE_COMMAND_HELPER_CONTRACT.md](./contracts/CONSOLE_COMMAND_HELPER_CONTRACT.md)
+
+## Planning
+
+- [M1_BACKLOG.md](./planning/M1_BACKLOG.md)
+- [M1_PLUGIN_FIRST_PLAN.md](./planning/M1_PLUGIN_FIRST_PLAN.md)
+- [M1_PLUGIN_IMPLEMENTATION_ORDER.md](./planning/M1_PLUGIN_IMPLEMENTATION_ORDER.md)
+
+## Archive
+
+- [PROJECT_FRAMING.md](./archive/PROJECT_FRAMING.md)
+- [M0_SCOPE.md](./archive/M0_SCOPE.md)
+- [DECISIONS.md](./archive/DECISIONS.md)
+- [AGENT_USAGE_MODEL.md](./archive/AGENT_USAGE_MODEL.md)
+- [UNREAL_EXPOSURE_PLAN.md](./archive/UNREAL_EXPOSURE_PLAN.md)
+- [IMPLEMENTATION_ORDER.md](./archive/IMPLEMENTATION_ORDER.md)
+- [REFERENCE_REPOS.md](./archive/REFERENCE_REPOS.md)

@@ -72,7 +72,7 @@ It does not:
 
 ## Recommended Companion Docs
 
-- [README.md](./README.md)
+- [README.md](../../README.md)
 - [PLUGIN_RUNBOOK.md](./PLUGIN_RUNBOOK.md)
 - [CPP_ITERATION_WORKFLOW.md](./CPP_ITERATION_WORKFLOW.md)
 - [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md)

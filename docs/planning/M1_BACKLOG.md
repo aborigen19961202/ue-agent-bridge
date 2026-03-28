@@ -8,7 +8,7 @@ This file lists candidate work after M0. Nothing here is implemented as part of 
 - define a plugin-owned localhost backend contract for editor-global operations
 - keep the external MCP surface stable while removing manual `UE_AgentBridge_M0` authoring from the normal workflow
 - support installation as a project plugin or engine plugin
-- implement the plugin health endpoint and explicit readiness model from [M1_PLUGIN_CONTRACT.md](./M1_PLUGIN_CONTRACT.md)
+- implement the plugin health endpoint and explicit readiness model from [M1_PLUGIN_CONTRACT.md](../contracts/M1_PLUGIN_CONTRACT.md)
 
 ## Priority 2: Capability Ownership Shift
 

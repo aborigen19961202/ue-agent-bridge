@@ -2,7 +2,7 @@
 
 This repository provides a bounded Unreal Engine bridge for external coding agents.
 
-Read [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md) first and follow it as the default operating model.
+Read [AGENT_PLAYBOOK.md](./docs/guides/AGENT_PLAYBOOK.md) first and follow it as the default operating model.
 
 ## Short Rules
 

@@ -10,8 +10,8 @@ Plugin-first release of `UE_AgentBridge`.
 - `plugin` backend mode in the TypeScript bridge
 - distributable plugin packaging script at [`scripts/package-ue-plugin.ps1`](./scripts/package-ue-plugin.ps1)
 - third-party install and Fab readiness docs:
-  - [`THIRD_PARTY_INSTALL.md`](./THIRD_PARTY_INSTALL.md)
-  - [`FAB_RELEASE_READINESS.md`](./FAB_RELEASE_READINESS.md)
+  - [`docs/guides/THIRD_PARTY_INSTALL.md`](./docs/guides/THIRD_PARTY_INSTALL.md)
+  - [`docs/release/FAB_RELEASE_READINESS.md`](./docs/release/FAB_RELEASE_READINESS.md)
 - plugin-owned endpoints for:
   - `ue_healthcheck`
   - `ue_get_selected_actors`
@@ -88,9 +88,9 @@ Initial M0 release of `UE_AgentBridge`.
 
 ### Helper Contracts
 
-- [SELECTED_ACTORS_HELPER_CONTRACT.md](/E:/Projects/AgentSkills/UE_AgentBridge/SELECTED_ACTORS_HELPER_CONTRACT.md)
-- [OUTPUT_LOG_HELPER_CONTRACT.md](/E:/Projects/AgentSkills/UE_AgentBridge/OUTPUT_LOG_HELPER_CONTRACT.md)
-- [CONSOLE_COMMAND_HELPER_CONTRACT.md](/E:/Projects/AgentSkills/UE_AgentBridge/CONSOLE_COMMAND_HELPER_CONTRACT.md)
+- [SELECTED_ACTORS_HELPER_CONTRACT.md](./docs/contracts/SELECTED_ACTORS_HELPER_CONTRACT.md)
+- [OUTPUT_LOG_HELPER_CONTRACT.md](./docs/contracts/OUTPUT_LOG_HELPER_CONTRACT.md)
+- [CONSOLE_COMMAND_HELPER_CONTRACT.md](./docs/contracts/CONSOLE_COMMAND_HELPER_CONTRACT.md)
 
 ### Validation Surface
 

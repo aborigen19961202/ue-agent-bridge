@@ -67,6 +67,6 @@ This gives a clean future migration path:
 
 The source of truth for agent behavior remains:
 
-- [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md)
+- [AGENT_PLAYBOOK.md](../guides/AGENT_PLAYBOOK.md)
 
 The companion packages should mirror that behavior, not invent their own model.

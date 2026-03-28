@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Use [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md) as the main operating guide for this repository.
+Use [AGENT_PLAYBOOK.md](./docs/guides/AGENT_PLAYBOOK.md) as the main operating guide for this repository.
 
 This bridge exists so Claude Code can stay repo-aware outside Unreal while using Unreal Editor as a bounded tool layer.
 

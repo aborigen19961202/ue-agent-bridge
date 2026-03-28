@@ -56,7 +56,7 @@
 
 ## Documentation Review
 
-- confirm [README.md](/E:/Projects/AgentSkills/UE_AgentBridge/README.md) matches the real implemented M0 surface
+- confirm [README.md](../../README.md) matches the real implemented M0 surface
 - confirm helper contract docs match the backend request and response shapes
 - confirm unsupported scope is stated clearly
 - confirm quick-start validation steps are accurate

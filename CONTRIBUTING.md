@@ -5,7 +5,7 @@ Thanks for contributing to `UEAgentBridge`.
 ## Before You Start
 
 - read [README.md](./README.md) for the current product shape
-- follow [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md) for the intended repo/Unreal boundary
+- follow [AGENT_PLAYBOOK.md](./docs/guides/AGENT_PLAYBOOK.md) for the intended repo/Unreal boundary
 - check open issues or start a discussion before making large workflow or tool-surface changes
 
 ## Development Expectations

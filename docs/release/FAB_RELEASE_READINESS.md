@@ -5,14 +5,14 @@ This document captures what is ready now and what still needs to happen before `
 ## Already Ready
 
 - plugin-first architecture is implemented
-- Unreal plugin package exists under [`unreal-plugin/UEAgentBridge`](./unreal-plugin/UEAgentBridge)
+- Unreal plugin package exists under [`unreal-plugin/UEAgentBridge`](../../unreal-plugin/UEAgentBridge)
 - external bridge and Unreal plugin have been live-tested together
 - plugin mode is the normal path
 - no manual Remote Control preset authoring is required for normal use
 - a repeatable packaging script now exists:
-  - [`scripts/package-ue-plugin.ps1`](./scripts/package-ue-plugin.ps1)
+  - [`scripts/package-ue-plugin.ps1`](../../scripts/package-ue-plugin.ps1)
 - a third-party install path is documented:
-  - [`THIRD_PARTY_INSTALL.md`](./THIRD_PARTY_INSTALL.md)
+  - [`THIRD_PARTY_INSTALL.md`](../guides/THIRD_PARTY_INSTALL.md)
 - a packaged zip install has already been validated on a local Unreal test project
 
 ## Still Required Before Real Fab Submission

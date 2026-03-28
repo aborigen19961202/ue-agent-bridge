@@ -8,7 +8,7 @@
 
 ## Public-Facing Docs
 
-- review [README.md](./README.md) for accuracy against the implemented M0 surface
+- review [README.md](../../README.md) for accuracy against the implemented M0 surface
 - confirm release docs are linked clearly from the README
 - confirm helper contract docs are linked and readable
 - confirm unsupported scope is stated clearly

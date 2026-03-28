@@ -46,16 +46,16 @@ What stays outside Unreal on purpose:
 - shell and build command execution
 - project architecture reasoning
 
-For C++ iteration, the recommended build-and-diagnostics loop is documented in [CPP_ITERATION_WORKFLOW.md](./CPP_ITERATION_WORKFLOW.md).
+For C++ iteration, the recommended build-and-diagnostics loop is documented in [CPP_ITERATION_WORKFLOW.md](./docs/guides/CPP_ITERATION_WORKFLOW.md).
 The practical rule is simple: full external `Editor` target builds should run with Unreal Editor closed, while in-editor iteration should use the bridge's Live Coding path after a successful external build.
 
-For agent behavior, the practical operating guide is [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md). Repo-local agent instruction files [AGENTS.md](./AGENTS.md) and [CLAUDE.md](./CLAUDE.md) now point at that playbook instead of carrying separate workflow rules.
+For agent behavior, the practical operating guide is [AGENT_PLAYBOOK.md](./docs/guides/AGENT_PLAYBOOK.md). Repo-local agent instruction files [AGENTS.md](./AGENTS.md) and [CLAUDE.md](./CLAUDE.md) now point at that playbook instead of carrying separate workflow rules.
 
 Companion agent packages now live in this repo too:
 
-- [AGENT_PACKAGE_STRATEGY.md](./AGENT_PACKAGE_STRATEGY.md)
-- [AGENT_PACKAGE_INSTALL.md](./AGENT_PACKAGE_INSTALL.md)
-- [CLIENT_INTEGRATION.md](./CLIENT_INTEGRATION.md)
+- [AGENT_PACKAGE_STRATEGY.md](./docs/integrations/AGENT_PACKAGE_STRATEGY.md)
+- [AGENT_PACKAGE_INSTALL.md](./docs/integrations/AGENT_PACKAGE_INSTALL.md)
+- [CLIENT_INTEGRATION.md](./docs/guides/CLIENT_INTEGRATION.md)
 - Codex skill source: [`agent-packages/codex-skills/ue-agent-bridge`](./agent-packages/codex-skills/ue-agent-bridge)
 - Claude companion instructions: [`agent-packages/claude-code/CLAUDE.md`](./agent-packages/claude-code/CLAUDE.md)
 
@@ -103,8 +103,8 @@ Plugin source is packaged in this repo at [`unreal-plugin/UEAgentBridge`](./unre
 
 For third-party installation and packaging:
 
-- [THIRD_PARTY_INSTALL.md](./THIRD_PARTY_INSTALL.md)
-- [FAB_RELEASE_READINESS.md](./FAB_RELEASE_READINESS.md)
+- [THIRD_PARTY_INSTALL.md](./docs/guides/THIRD_PARTY_INSTALL.md)
+- [FAB_RELEASE_READINESS.md](./docs/release/FAB_RELEASE_READINESS.md)
 
 Current plugin API:
 
@@ -220,7 +220,7 @@ Important:
 
 - run the sync script with Unreal Editor closed
 - the script now refuses to mirror plugin files into a live editor session unless you explicitly add `-CloseEditor`
-- daily operator flow is captured in [PLUGIN_RUNBOOK.md](./PLUGIN_RUNBOOK.md)
+- daily operator flow is captured in [PLUGIN_RUNBOOK.md](./docs/guides/PLUGIN_RUNBOOK.md)
 
 ## Configuration
 
@@ -373,6 +373,13 @@ The code is split into:
 Repo layout:
 
 ```text
+docs/
+  archive/
+  contracts/
+  guides/
+  integrations/
+  planning/
+  release/
 src/
   backend/
   config/
@@ -390,41 +397,19 @@ unreal-plugin/
 Contributions are welcome.
 
 Start with [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
-For workflow-sensitive changes, keep the repo/Unreal boundary aligned with [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md).
+For workflow-sensitive changes, keep the repo/Unreal boundary aligned with [AGENT_PLAYBOOK.md](./docs/guides/AGENT_PLAYBOOK.md).
 
 ## License
 
 This project is released under the [MIT License](./LICENSE).
 
-## Release And Planning Docs
+## Documentation
 
-- [CHANGELOG.md](./CHANGELOG.md)
-- [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md)
-- [M1_BACKLOG.md](./M1_BACKLOG.md)
-- [M1_PLUGIN_FIRST_PLAN.md](./M1_PLUGIN_FIRST_PLAN.md)
-- [M1_PLUGIN_CONTRACT.md](./M1_PLUGIN_CONTRACT.md)
-- [M1_PLUGIN_IMPLEMENTATION_ORDER.md](./M1_PLUGIN_IMPLEMENTATION_ORDER.md)
-- [GITHUB_PUBLISH_CHECKLIST.md](./GITHUB_PUBLISH_CHECKLIST.md)
-- [CPP_ITERATION_WORKFLOW.md](./CPP_ITERATION_WORKFLOW.md)
-- [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md)
-- [AGENT_PACKAGE_STRATEGY.md](./AGENT_PACKAGE_STRATEGY.md)
-- [AGENT_PACKAGE_INSTALL.md](./AGENT_PACKAGE_INSTALL.md)
-- [CLIENT_INTEGRATION.md](./CLIENT_INTEGRATION.md)
-- [THIRD_PARTY_INSTALL.md](./THIRD_PARTY_INSTALL.md)
-- [FAB_RELEASE_READINESS.md](./FAB_RELEASE_READINESS.md)
+Documentation is grouped under [`docs/`](./docs/README.md):
 
-Historical M0 planning and Remote Control docs remain in the repo for reference:
-
-- [PROJECT_FRAMING.md](./PROJECT_FRAMING.md)
-- [M0_SCOPE.md](./M0_SCOPE.md)
-- [DECISIONS.md](./DECISIONS.md)
-- [AGENT_USAGE_MODEL.md](./AGENT_USAGE_MODEL.md)
-- [REMOTE_CONTROL_CONTRACT.md](./REMOTE_CONTROL_CONTRACT.md)
-- [UNREAL_EXPOSURE_PLAN.md](./UNREAL_EXPOSURE_PLAN.md)
-- [IMPLEMENTATION_ORDER.md](./IMPLEMENTATION_ORDER.md)
-- [SELECTED_ACTORS_HELPER_CONTRACT.md](./SELECTED_ACTORS_HELPER_CONTRACT.md)
-- [OUTPUT_LOG_HELPER_CONTRACT.md](./OUTPUT_LOG_HELPER_CONTRACT.md)
-- [CONSOLE_COMMAND_HELPER_CONTRACT.md](./CONSOLE_COMMAND_HELPER_CONTRACT.md)
-- [REFERENCE_REPOS.md](./REFERENCE_REPOS.md)
-- [AGENTS.md](./AGENTS.md)
-- [CLAUDE.md](./CLAUDE.md)
+- guides: [AGENT_PLAYBOOK.md](./docs/guides/AGENT_PLAYBOOK.md), [CPP_ITERATION_WORKFLOW.md](./docs/guides/CPP_ITERATION_WORKFLOW.md), [PLUGIN_RUNBOOK.md](./docs/guides/PLUGIN_RUNBOOK.md), [THIRD_PARTY_INSTALL.md](./docs/guides/THIRD_PARTY_INSTALL.md), [CLIENT_INTEGRATION.md](./docs/guides/CLIENT_INTEGRATION.md)
+- integrations: [AGENT_PACKAGE_STRATEGY.md](./docs/integrations/AGENT_PACKAGE_STRATEGY.md), [AGENT_PACKAGE_INSTALL.md](./docs/integrations/AGENT_PACKAGE_INSTALL.md)
+- release: [RELEASE_CHECKLIST.md](./docs/release/RELEASE_CHECKLIST.md), [GITHUB_PUBLISH_CHECKLIST.md](./docs/release/GITHUB_PUBLISH_CHECKLIST.md), [FAB_RELEASE_READINESS.md](./docs/release/FAB_RELEASE_READINESS.md), [SAFE_MUTATION_VERIFICATION.md](./docs/release/SAFE_MUTATION_VERIFICATION.md)
+- contracts: [M1_PLUGIN_CONTRACT.md](./docs/contracts/M1_PLUGIN_CONTRACT.md), [REMOTE_CONTROL_CONTRACT.md](./docs/contracts/REMOTE_CONTROL_CONTRACT.md), [SELECTED_ACTORS_HELPER_CONTRACT.md](./docs/contracts/SELECTED_ACTORS_HELPER_CONTRACT.md), [OUTPUT_LOG_HELPER_CONTRACT.md](./docs/contracts/OUTPUT_LOG_HELPER_CONTRACT.md), [CONSOLE_COMMAND_HELPER_CONTRACT.md](./docs/contracts/CONSOLE_COMMAND_HELPER_CONTRACT.md)
+- planning: [M1_BACKLOG.md](./docs/planning/M1_BACKLOG.md), [M1_PLUGIN_FIRST_PLAN.md](./docs/planning/M1_PLUGIN_FIRST_PLAN.md), [M1_PLUGIN_IMPLEMENTATION_ORDER.md](./docs/planning/M1_PLUGIN_IMPLEMENTATION_ORDER.md)
+- archive: [PROJECT_FRAMING.md](./docs/archive/PROJECT_FRAMING.md), [M0_SCOPE.md](./docs/archive/M0_SCOPE.md), [DECISIONS.md](./docs/archive/DECISIONS.md), [AGENT_USAGE_MODEL.md](./docs/archive/AGENT_USAGE_MODEL.md), [UNREAL_EXPOSURE_PLAN.md](./docs/archive/UNREAL_EXPOSURE_PLAN.md), [IMPLEMENTATION_ORDER.md](./docs/archive/IMPLEMENTATION_ORDER.md), [REFERENCE_REPOS.md](./docs/archive/REFERENCE_REPOS.md)

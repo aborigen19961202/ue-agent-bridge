@@ -12,7 +12,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\sync-ue-plugin.ps1 -ProjectRo
 
 The sync script:
 
-- mirrors [`unreal-plugin/UEAgentBridge`](./unreal-plugin/UEAgentBridge) into `<Project>/Plugins/UEAgentBridge`
+- mirrors [`unreal-plugin/UEAgentBridge`](../../unreal-plugin/UEAgentBridge) into `<Project>/Plugins/UEAgentBridge`
 - ensures the plugin is enabled in the `.uproject`
 - refuses to run against a live Unreal Editor session unless you explicitly pass `-CloseEditor`
 
