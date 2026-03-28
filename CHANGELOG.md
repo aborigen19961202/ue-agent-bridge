@@ -40,9 +40,9 @@ Plugin-first release of `UE_AgentBridge`.
 ### Validation Surface
 
 - typecheck, tests, and build pass for the TypeScript bridge
-- `CleanModelFactoryEditor` build succeeded with the installed `UEAgentBridge` plugin
-- live Unreal validation passed for plugin mode on the current local `CleanModelFactory` editor session
-- packaged plugin zip install was validated by reinstalling into `CleanModelFactory`, rebuilding, restarting the editor, and rerunning plugin smoke validation
+- a local `<ProjectName>Editor` build succeeded with the installed `UEAgentBridge` plugin
+- live Unreal validation passed for plugin mode on a local editor session
+- packaged plugin zip install was validated by reinstalling into a local Unreal project, rebuilding, restarting the editor, and rerunning plugin smoke validation
 
 ## 0.1.0 - M0
 

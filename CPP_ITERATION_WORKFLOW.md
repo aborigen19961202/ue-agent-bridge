@@ -44,8 +44,8 @@ Use the bundled PowerShell helper:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\run-ue-build.ps1 `
-  -ProjectRoot "E:\UnrealEngine\Projects\CleanModelFactory" `
-  -ProjectName "CleanModelFactory" `
+  -ProjectRoot "<ProjectRoot>" `
+  -ProjectName "<ProjectName>" `
   -EditorTarget
 ```
 
@@ -62,7 +62,7 @@ If a raw build log already exists:
 
 ```powershell
 npm run build
-node .\scripts\parse-ue-build-log.mjs "E:\UnrealEngine\Projects\CleanModelFactory\Saved\UEAgentBridgeBuild\CleanModelFactoryEditor-20260311-120000.log"
+node .\scripts\parse-ue-build-log.mjs "<ProjectRoot>\Saved\UEAgentBridgeBuild\<ProjectName>Editor-YYYYMMDD-HHMMSS.log"
 ```
 
 ## Parsed Diagnostic Shape

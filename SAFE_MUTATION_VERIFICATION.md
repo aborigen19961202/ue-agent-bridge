@@ -39,7 +39,7 @@ Verify the bounded editor mutation surface after syncing this plugin build into 
 ## Result For This Change Set
 
 - TypeScript contract and mock/plugin-backend tests were updated to cover the new safe mutation surface.
-- Runtime verification was executed on March 28, 2026 against `E:\UnrealEngine\Projects\CleanModelFactory`.
+- Runtime verification was executed on March 28, 2026 against a local Unreal test project.
 - `ue_healthcheck` reported the new capabilities: `ue_spawn_actor_safe`, `ue_select_actor_safe`, `ue_destroy_actor_safe`.
 - `spawn-safe` succeeded for allowlisted class `TargetPoint` with label `UEAB_SpawnSmoke`.
 - Verification succeeded through existing endpoints:

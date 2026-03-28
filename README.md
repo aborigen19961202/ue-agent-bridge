@@ -212,9 +212,9 @@ npm run package:plugin
 
 That stages a clean plugin package under `artifacts/plugin-package` and creates a zip that can be tested as a third-party install candidate.
 
-For the current live-tested integration target, the plugin was installed in:
+For a live-tested integration target, the plugin was installed as:
 
-- `E:\UnrealEngine\Projects\CleanModelFactory\Plugins\UEAgentBridge`
+- `<ProjectRoot>\Plugins\UEAgentBridge`
 
 Important:
 
@@ -336,7 +336,7 @@ Automated checks passing:
 - `npm test`
 - `npm run build`
 
-Live-tested against the currently open `CleanModelFactory` Unreal project:
+Live-tested against a local Unreal project:
 
 - plugin health endpoint reachable on `127.0.0.1:30110`
 - `ue_get_selected_actors` with non-empty selection
@@ -359,7 +359,7 @@ Live-tested against the currently open `CleanModelFactory` Unreal project:
 - `ue_set_property`
 - external editor-target build through `Build.bat`
 - external build-log parsing into structured JSON diagnostics
-- packaged plugin zip install into `CleanModelFactory\Plugins\UEAgentBridge`
+- packaged plugin zip install into `<ProjectRoot>\Plugins\UEAgentBridge`
 - restart and smoke validation after packaged zip install
 
 ## Architecture
@@ -384,6 +384,17 @@ test/
 unreal-plugin/
   UEAgentBridge/
 ```
+
+## Contributing
+
+Contributions are welcome.
+
+Start with [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
+For workflow-sensitive changes, keep the repo/Unreal boundary aligned with [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md).
+
+## License
+
+This project is released under the [MIT License](./LICENSE).
 
 ## Release And Planning Docs
 

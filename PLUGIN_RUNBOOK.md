@@ -7,7 +7,7 @@ This is the shortest repeatable daily workflow for the plugin-first bridge.
 Run with Unreal Editor closed:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\sync-ue-plugin.ps1 -ProjectRoot "E:\UnrealEngine\Projects\CleanModelFactory"
+powershell -ExecutionPolicy Bypass -File .\scripts\sync-ue-plugin.ps1 -ProjectRoot "<ProjectRoot>"
 ```
 
 The sync script:
@@ -19,13 +19,13 @@ The sync script:
 ## Build The Target Project
 
 ```powershell
-& 'E:\UnrealEngine\UE_5.7\Engine\Build\BatchFiles\Build.bat' CleanModelFactoryEditor Win64 Development -Project='E:\UnrealEngine\Projects\CleanModelFactory\CleanModelFactory.uproject' -WaitMutex -NoHotReloadFromIDE
+& '<EngineRoot>\Engine\Build\BatchFiles\Build.bat' <ProjectName>Editor Win64 Development -Project='<ProjectRoot>\<ProjectName>.uproject' -WaitMutex -NoHotReloadFromIDE
 ```
 
 For repeatable agent use, prefer the wrapper:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run-ue-build.ps1 -ProjectRoot "E:\UnrealEngine\Projects\CleanModelFactory" -ProjectName "CleanModelFactory" -EditorTarget
+powershell -ExecutionPolicy Bypass -File .\scripts\run-ue-build.ps1 -ProjectRoot "<ProjectRoot>" -ProjectName "<ProjectName>" -EditorTarget
 ```
 
 Important:
@@ -44,7 +44,7 @@ The C++ iteration model is documented in [CPP_ITERATION_WORKFLOW.md](./CPP_ITERA
 ## Launch Unreal Editor
 
 ```powershell
-Start-Process -FilePath 'E:\UnrealEngine\UE_5.7\Engine\Binaries\Win64\UnrealEditor.exe' -ArgumentList '"E:\UnrealEngine\Projects\CleanModelFactory\CleanModelFactory.uproject"'
+Start-Process -FilePath '<EngineRoot>\Engine\Binaries\Win64\UnrealEditor.exe' -ArgumentList '"<ProjectRoot>\<ProjectName>.uproject"'
 ```
 
 ## Start The Bridge

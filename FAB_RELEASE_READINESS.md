@@ -13,13 +13,13 @@ This document captures what is ready now and what still needs to happen before `
   - [`scripts/package-ue-plugin.ps1`](./scripts/package-ue-plugin.ps1)
 - a third-party install path is documented:
   - [`THIRD_PARTY_INSTALL.md`](./THIRD_PARTY_INSTALL.md)
-- a packaged zip install has already been validated on `CleanModelFactory`
+- a packaged zip install has already been validated on a local Unreal test project
 
 ## Still Required Before Real Fab Submission
 
 - final public license decision
 - listing copy, screenshots, icon, and marketplace presentation assets
-- validation on at least one additional Unreal project beyond `CleanModelFactory`
+- validation on at least one additional Unreal project beyond the initial validation target
 - confirmation of engine-version support policy
 - a release artifact review of the packaged zip
 - a decision on whether bridge docs and agent instructions stay in this repo or move to a companion repo/site

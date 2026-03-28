@@ -2,7 +2,24 @@
   "name": "ue-agent-bridge",
   "version": "0.3.0",
   "private": true,
+  "license": "MIT",
   "description": "Plugin-first Unreal Engine agent bridge for external coding agents",
+  "keywords": [
+    "unreal-engine",
+    "mcp",
+    "agent",
+    "plugin",
+    "codex",
+    "claude-code"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aborigen19961202/ue-agent-bridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aborigen19961202/ue-agent-bridge/issues"
+  },
+  "homepage": "https://github.com/aborigen19961202/ue-agent-bridge#readme",
   "type": "module",
   "engines": {
     "node": ">=20.0.0"

@@ -18,7 +18,7 @@
 - confirm package name matches the repo name expectation: `ue-agent-bridge`
 - confirm version is correct for the initial publication
 - confirm description is accurate for public readers
-- decide whether `private: true` should remain for the initial push
+- keep `private: true` unless and until an npm publication path is intentional
 
 ## Validation
 
@@ -30,7 +30,7 @@
 
 ## GitHub-Side Manual Setup
 
-- create the GitHub repository `ue-agent-bridge`
+- confirm the GitHub repository `ue-agent-bridge` visibility, description, and topics
 - choose and add a `LICENSE` file
 - add repository description and topics
 - decide whether to enable Issues and Discussions

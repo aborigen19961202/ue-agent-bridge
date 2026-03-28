@@ -18,13 +18,13 @@ It:
 
 Codex uses user-level MCP config in:
 
-- `C:\Users\aborigen\.codex\config.toml`
+- `%USERPROFILE%\.codex\config.toml`
 
 Installed entry on this machine:
 
 ```toml
 [mcp_servers.ue-agent-bridge]
-args = ["/c", "E:\\Projects\\AgentSkills\\UE_AgentBridge\\scripts\\start-ue-agent-bridge.cmd"]
+args = ["/c", "<RepoRoot>\\scripts\\start-ue-agent-bridge.cmd"]
 command = "cmd"
 ```
 
@@ -38,9 +38,9 @@ Repository-level file created in this repo:
 
 - [`.mcp.json`](./.mcp.json)
 
-Active project-level file installed for the live Unreal target:
+Active project-level file installed for a live Unreal target:
 
-- `E:\UnrealEngine\Projects\CleanModelFactory\.mcp.json`
+- `<ProjectRoot>\.mcp.json`
 
 Installed config:
 
@@ -50,15 +50,15 @@ Installed config:
     "command": "cmd",
     "args": [
       "/c",
-      "E:\\Projects\\AgentSkills\\UE_AgentBridge\\scripts\\start-ue-agent-bridge.cmd"
+      "<RepoRoot>\\scripts\\start-ue-agent-bridge.cmd"
     ]
   }
 }
 ```
 
-On this machine, Claude project state was also updated so `ue-agent-bridge` is enabled for:
+Claude project state should be updated so `ue-agent-bridge` is enabled for the Unreal project repo:
 
-- `E:\UnrealEngine\Projects\CleanModelFactory`
+- `<ProjectRoot>`
 
 ## Practical Rule
 

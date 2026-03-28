@@ -123,7 +123,7 @@ Expected response:
   "apiVersion": "v1",
   "editor": {
     "available": true,
-    "projectName": "CleanModelFactory"
+    "projectName": "<ProjectName>"
   },
   "capabilities": {
     "ue_get_selected_actors": true,
@@ -424,4 +424,3 @@ The contract is good enough to start implementation when:
 - readiness semantics are fixed
 - the error envelope is fixed
 - the bridge can add a `plugin` backend without changing external tool names
-
