@@ -1,10 +1,10 @@
 # UE_AgentBridge
 
-`UE_AgentBridge` is a standalone Unreal Engine bridge for external coding agents such as Codex app and Claude Code.
+`UE_AgentBridge` lets tools like Codex and Claude work with a live Unreal Editor session without turning Unreal into your IDE or your build system.
 
-The agent stays outside Unreal. Repo reasoning, file edits, git, shell, and build orchestration stay outside Unreal. Unreal Editor is exposed as a bounded localhost tool layer.
+In plain terms: your agent can inspect actors, read logs, check editor state, frame the viewport, capture screenshots, and trigger a few safe editor actions, while code edits, builds, git, and project reasoning stay in the normal repo workflow.
 
-`UE_AgentBridge` is plugin-first:
+The project is plugin-first:
 
 - TypeScript MCP server over stdio
 - reusable Unreal project plugin under [`unreal-plugin/UEAgentBridge`](./unreal-plugin/UEAgentBridge)
@@ -14,16 +14,18 @@ The agent stays outside Unreal. Repo reasoning, file edits, git, shell, and buil
 
 ## What It Does
 
-The bridge gives external agents a bounded Unreal tool surface for:
+It helps solve the usual "AI can edit code but cannot really see Unreal" problem.
 
-- editor readiness and health checks
-- selected actors, level actors, and property reads
-- bounded property writes
-- output log and editor diagnostics
-- viewport camera control and framed screenshots
-- debug draw inspection and visual verification
-- safe Live Coding status/build actions
-- a deny-by-default safe console command surface
+With `UE_AgentBridge`, an external agent can:
+
+- check whether the editor is ready and connected
+- inspect selected actors, level actors, and object properties
+- make narrow, explicit property changes
+- read output log slices and editor diagnostics
+- move the viewport camera and capture useful screenshots
+- inspect debug draw output for visual debugging
+- check Live Coding readiness and trigger a safe reload path
+- run only a small allowlisted set of safe console actions
 
 What stays outside Unreal on purpose:
 
@@ -33,7 +35,7 @@ What stays outside Unreal on purpose:
 - shell and build command execution
 - architecture and code reasoning
 
-The Unreal plugin is localhost-only and intentionally narrow. It is not a generic execution host.
+That separation is the point: Unreal becomes a reliable source of live editor state, not a giant uncontrolled execution surface.
 
 ## Install
 

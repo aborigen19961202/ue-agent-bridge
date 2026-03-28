@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "private": true,
   "license": "MIT",
-  "description": "Plugin-first Unreal Engine agent bridge for external coding agents",
+  "description": "Let Codex and Claude inspect and operate a live Unreal Editor without moving code work into Unreal",
   "keywords": [
     "unreal-engine",
     "mcp",
