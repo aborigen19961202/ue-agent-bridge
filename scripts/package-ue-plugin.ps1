@@ -38,7 +38,7 @@ if (Test-Path $stageRoot) {
   Remove-Item -Recurse -Force $stageRoot
 }
 
-robocopy $pluginSource $stagePluginRoot /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
+robocopy $pluginSource $stagePluginRoot /MIR /NFL /NDL /NJH /NJS /NP /XD Binaries Intermediate .git | Out-Null
 
 New-Item -ItemType Directory -Force -Path (Join-Path $stagePluginRoot "Config") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $stagePluginRoot "Content") | Out-Null
