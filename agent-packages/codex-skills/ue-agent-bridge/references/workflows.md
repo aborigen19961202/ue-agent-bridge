@@ -67,7 +67,7 @@ Use this only when a bounded editor mutation is required and property writes are
 1. Run `ue_healthcheck`.
 2. Confirm readiness exposes `ue_spawn_actor_safe`, `ue_select_actor_safe`, or `ue_destroy_actor_safe`.
 3. Prefer `ue_get_level_actors` first if you need to avoid duplicate actors or confirm the cleanup target.
-4. Run `ue_spawn_actor_safe` with exactly one allowlisted class identifier plus explicit `location` and `rotation`.
+4. Run `ue_spawn_actor_safe` with exactly one class identifier plus explicit `location` and `rotation`.
 5. If follow-up tools depend on selection, run `ue_select_actor_safe` or set `selectAfterSpawn`.
 6. Verify with `ue_get_level_actors`, `ue_get_selected_actors`, and `ue_frame_actor` or `ue_capture_actor_screenshot`.
 7. Use `ue_destroy_actor_safe` only for targeted cleanup, not for broad scene editing.
@@ -75,7 +75,9 @@ Use this only when a bounded editor mutation is required and property writes are
 Important:
 
 - spawn-safe is bounded mutation, not generic object creation
-- Blueprint-generated classes stay unsupported
+- spawn-safe allows project-native classes, project-plugin classes, and project Blueprint actor classes inside the safe scope policy
+- you should not need to patch the bridge every time a new project actor class is added
+- out-of-scope, abstract, deprecated, transient-only, and non-actor classes remain rejected
 - if readiness does not advertise the capability, do not improvise with Python, UI scripting, or raw console execution
 
 ## Safe Console Diagnostic

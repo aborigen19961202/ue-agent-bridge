@@ -591,7 +591,7 @@ describe("PluginBackend", () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
       error: {
         code: "UNSAFE_MUTATION",
-        message: "Resolved class is outside the spawn-safe allowlist."
+        message: "Resolved class is outside the allowed project/plugin spawn scope."
       }
     }), {
       status: 403,

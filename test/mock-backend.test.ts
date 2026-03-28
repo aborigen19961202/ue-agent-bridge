@@ -178,19 +178,19 @@ describe("MockUnrealBackend", () => {
     });
   });
 
-  it("supports safe spawn, select, and destroy mutations", async () => {
+  it("supports project-scoped safe spawn, select, and destroy mutations", async () => {
     const backend = new MockUnrealBackend();
     const spawned = await backend.spawnActor({
-      className: "TargetPoint",
+      className: "GrapeRachisActor",
       location: { x: 10, y: 20, z: 30 },
       rotation: { pitch: 0, yaw: 45, roll: 0 },
       selectAfterSpawn: true,
-      label: "BridgeSpawn"
+      label: "GrapeRachisSpawn"
     });
 
     expect(spawned).toMatchObject({
-      actorLabel: "BridgeSpawn",
-      className: "TargetPoint",
+      actorLabel: "GrapeRachisSpawn",
+      className: "GrapeRachisActor",
       selected: true,
       location: { x: 10, y: 20, z: 30 }
     });
@@ -207,6 +207,35 @@ describe("MockUnrealBackend", () => {
     })).resolves.toMatchObject({
       actorName: spawned.actorName,
       destroyed: true
+    });
+  });
+
+  it("rejects non-actor, abstract, and out-of-scope spawn classes", async () => {
+    const backend = new MockUnrealBackend();
+    const transform = {
+      location: { x: 0, y: 0, z: 0 },
+      rotation: { pitch: 0, yaw: 0, roll: 0 }
+    };
+
+    await expect(backend.spawnActor({
+      classPath: "/Script/Engine.DataAsset",
+      ...transform
+    })).rejects.toMatchObject({
+      code: "UNSAFE_MUTATION"
+    });
+
+    await expect(backend.spawnActor({
+      classPath: "/Script/ModelFactory.AbstractVineActor",
+      ...transform
+    })).rejects.toMatchObject({
+      code: "UNSAFE_MUTATION"
+    });
+
+    await expect(backend.spawnActor({
+      classPath: "/Script/CinematicCamera.CineCameraActor",
+      ...transform
+    })).rejects.toMatchObject({
+      code: "UNSAFE_MUTATION"
     });
   });
 

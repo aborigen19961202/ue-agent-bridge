@@ -68,7 +68,7 @@ Important:
 
 - `ue_get_viewport_screenshot` is on-demand vision, not a streaming transport
 - `ue_get_viewport_camera` and `ue_set_viewport_camera` are bounded navigation tools for the active viewport
-- `ue_spawn_actor_safe` is a bounded editor-world mutation that requires one allowlisted class identifier plus an explicit transform
+- `ue_spawn_actor_safe` is a bounded editor-world mutation that requires one class identifier plus an explicit transform, and only allows project/project-plugin actor classes plus a small native fast-path
 - `ue_select_actor_safe` is the supported way to prepare follow-up selection-dependent checks without UI scripting
 - `ue_destroy_actor_safe` is limited targeted cleanup, not a generic scene-editing API
 - `ue_frame_actor` is the preferred way to recover when the subject is outside the current view
@@ -83,9 +83,19 @@ Important:
 
 - they run only against the editor world
 - they do not expose script execution or raw console input
-- spawn uses a deny-by-default class allowlist
-- destroy is intentionally narrower than generic actor deletion
-- Blueprint-generated classes remain unsupported because they blur the boundary into arbitrary editor-side execution
+- spawn uses a deny-by-default project/plugin scope policy instead of a hardcoded exact-class allowlist
+- safe spawn accepts:
+  - native fast-path actor classes such as lights, `TargetPoint`, and `PlayerStart`
+  - project-native actor classes under `/Script/<ProjectModule>.*`
+  - project-plugin actor classes under `/Script/<ProjectPluginModule>.*`
+  - project Blueprint actor classes under `/Game/..._C` when they still resolve to actor classes
+- spawn still rejects:
+  - non-actor classes
+  - abstract or deprecated classes
+  - transient-only / not-placeable exotic classes
+  - classes outside the allowed project/plugin scope
+- destroy follows the same class-scope policy for targeted cleanup
+- select stays broader because it is a bounded focus operation, not object creation or destruction
 
 ## Allowlisted Console Commands
 

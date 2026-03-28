@@ -36,7 +36,15 @@ import { resolveSafeConsoleCommand } from "../tools/console-command-policy.js";
 import { UnrealBackend } from "./unreal-backend.js";
 
 interface MockActorRecord extends ActorSummary {
+  classPath: string;
   properties: Record<string, unknown>;
+}
+
+interface MockSpawnClassRecord {
+  className: string;
+  classPath: string;
+  allowSpawn: boolean;
+  rejectReason?: string | undefined;
 }
 
 const MOCK_ACTORS: MockActorRecord[] = [
@@ -44,6 +52,7 @@ const MOCK_ACTORS: MockActorRecord[] = [
     actorLabel: "SM_Chair_01",
     actorName: "SM_Chair_01",
     className: "StaticMeshActor",
+    classPath: "/Script/Engine.StaticMeshActor",
     objectPath: "/Game/Maps/TestMap.TestMap:PersistentLevel.SM_Chair_01",
     selected: true,
     properties: {
@@ -56,6 +65,7 @@ const MOCK_ACTORS: MockActorRecord[] = [
     actorLabel: "PointLight_01",
     actorName: "PointLight_01",
     className: "PointLight",
+    classPath: "/Script/Engine.PointLight",
     objectPath: "/Game/Maps/TestMap.TestMap:PersistentLevel.PointLight_01",
     selected: true,
     properties: {
@@ -68,6 +78,7 @@ const MOCK_ACTORS: MockActorRecord[] = [
     actorLabel: "BP_Door_01",
     actorName: "BP_Door_01",
     className: "BP_Door_C",
+    classPath: "/Game/Blueprints/Interactables/BP_Door.BP_Door_C",
     objectPath: "/Game/Maps/TestMap.TestMap:PersistentLevel.BP_Door_01",
     selected: false,
     properties: {
@@ -176,6 +187,55 @@ const MOCK_DEBUG_DRAW_STATE: DebugDrawStateResult = {
     }
   }
 };
+
+const MOCK_NATIVE_SPAWN_FAST_PATHS = new Map<string, string>([
+  ["StaticMeshActor", "/Script/Engine.StaticMeshActor"],
+  ["PointLight", "/Script/Engine.PointLight"],
+  ["SpotLight", "/Script/Engine.SpotLight"],
+  ["DirectionalLight", "/Script/Engine.DirectionalLight"],
+  ["SkyLight", "/Script/Engine.SkyLight"],
+  ["CameraActor", "/Script/Engine.CameraActor"],
+  ["PlayerStart", "/Script/Engine.PlayerStart"],
+  ["TargetPoint", "/Script/Engine.TargetPoint"],
+  ["TriggerBox", "/Script/Engine.TriggerBox"]
+] as const);
+
+const MOCK_ALLOWED_PROJECT_SPAWN_SCOPES = [
+  "MockProject",
+  "CleanModelFactory",
+  "ModelFactory",
+  "ModelFactoryGrape"
+] as const;
+
+const MOCK_SPAWN_CLASS_REGISTRY: MockSpawnClassRecord[] = [
+  {
+    className: "GrapeRachisActor",
+    classPath: "/Script/ModelFactoryGrape.GrapeRachisActor",
+    allowSpawn: true
+  },
+  {
+    className: "CleanFactoryActor",
+    classPath: "/Script/CleanModelFactory.CleanFactoryActor",
+    allowSpawn: true
+  },
+  {
+    className: "BP_GrapeRachis_C",
+    classPath: "/Game/Blueprints/Grape/BP_GrapeRachis.BP_GrapeRachis_C",
+    allowSpawn: true
+  },
+  {
+    className: "AbstractVineActor",
+    classPath: "/Script/ModelFactory.AbstractVineActor",
+    allowSpawn: false,
+    rejectReason: "class is abstract"
+  },
+  {
+    className: "DataAsset",
+    classPath: "/Script/Engine.DataAsset",
+    allowSpawn: false,
+    rejectReason: "class is not an AActor subclass"
+  }
+];
 
 const LOG_LEVEL_ORDER = {
   Verbose: 10,
@@ -392,13 +452,14 @@ export class MockUnrealBackend implements UnrealBackend {
   }
 
   public async spawnActor(input: SpawnActorInput): Promise<SpawnActorResult> {
-    const className = normalizeMockSpawnClass(input);
-    const actorLabel = input.label?.trim() || `${className}_${String(this.actors.length + 1).padStart(2, "0")}`;
+    const resolvedClass = normalizeMockSpawnClass(input);
+    const actorLabel = input.label?.trim() || `${resolvedClass.className}_${String(this.actors.length + 1).padStart(2, "0")}`;
     const actorName = makeUniqueActorName(actorLabel, this.actors);
     const actor: MockActorRecord = {
       actorLabel,
       actorName,
-      className,
+      className: resolvedClass.className,
+      classPath: resolvedClass.classPath,
       objectPath: `/Game/Maps/TestMap.TestMap:PersistentLevel.${actorName}`,
       selected: input.selectAfterSpawn ?? false,
       properties: {
@@ -441,6 +502,15 @@ export class MockUnrealBackend implements UnrealBackend {
       target: input.target,
       propertyName: "RelativeLocation"
     });
+
+    const destroyPolicy = classifyMockSpawnClass({
+      className: actor.className,
+      classPath: actor.classPath
+    });
+    if (!destroyPolicy.allowSpawn) {
+      throw new BridgeError("UNSAFE_MUTATION", `Destroy-safe only supports actors inside the allowed project/plugin spawn scope: ${destroyPolicy.rejectReason ?? "class is outside the allowed project/plugin spawn scope"}.`);
+    }
+
     const actorIndex = this.actors.findIndex((candidate) => candidate.objectPath === actor.objectPath);
 
     if (actorIndex < 0) {
@@ -629,44 +699,110 @@ function clearSelected(actors: MockActorRecord[]): void {
   }
 }
 
-function normalizeMockSpawnClass(input: SpawnActorInput): string {
-  const allowlistedByName = new Set([
-    "StaticMeshActor",
-    "PointLight",
-    "SpotLight",
-    "DirectionalLight",
-    "SkyLight",
-    "CameraActor",
-    "PlayerStart",
-    "TargetPoint",
-    "TriggerBox"
-  ]);
-  const allowlistedByPath = new Map([
-    ["/Script/Engine.StaticMeshActor", "StaticMeshActor"],
-    ["/Script/Engine.PointLight", "PointLight"],
-    ["/Script/Engine.SpotLight", "SpotLight"],
-    ["/Script/Engine.DirectionalLight", "DirectionalLight"],
-    ["/Script/Engine.SkyLight", "SkyLight"],
-    ["/Script/Engine.CameraActor", "CameraActor"],
-    ["/Script/Engine.PlayerStart", "PlayerStart"],
-    ["/Script/Engine.TargetPoint", "TargetPoint"],
-    ["/Script/Engine.TriggerBox", "TriggerBox"]
-  ]);
-
+function normalizeMockSpawnClass(input: SpawnActorInput): { className: string; classPath: string } {
   if (input.classPath) {
-    const resolved = allowlistedByPath.get(input.classPath);
-    if (!resolved) {
-      throw new BridgeError("UNSAFE_MUTATION", `classPath is not allowlisted for spawn-safe: ${input.classPath}`);
+    const resolved = classifyMockSpawnClass({
+      className: input.className,
+      classPath: input.classPath
+    });
+
+    if (!resolved.allowSpawn) {
+      throw new BridgeError("UNSAFE_MUTATION", `Resolved class ${input.classPath} is not allowed for spawn-safe: ${resolved.rejectReason ?? "class is outside the allowed project/plugin spawn scope"}.`);
     }
 
-    return resolved;
+    return {
+      className: resolved.className,
+      classPath: resolved.classPath
+    };
   }
 
-  if (input.className && allowlistedByName.has(input.className)) {
-    return input.className;
+  if (!input.className) {
+    throw new BridgeError("VALIDATION_ERROR", "Spawn-safe requires className or classPath.");
   }
 
-  throw new BridgeError("UNSAFE_MUTATION", `className is not allowlisted for spawn-safe: ${input.className ?? "<empty>"}`);
+  const preferredClassPath = MOCK_NATIVE_SPAWN_FAST_PATHS.get(input.className);
+  if (preferredClassPath) {
+    return {
+      className: input.className,
+      classPath: preferredClassPath
+    };
+  }
+
+  const matches = MOCK_SPAWN_CLASS_REGISTRY.filter((entry) => entry.className === input.className);
+  if (matches.length === 1) {
+    const match = matches[0]!;
+    if (!match.allowSpawn) {
+      throw new BridgeError("UNSAFE_MUTATION", `Resolved class ${match.classPath} is not allowed for spawn-safe: ${match.rejectReason ?? "class is outside the allowed project/plugin spawn scope"}.`);
+    }
+
+    return {
+      className: match.className,
+      classPath: match.classPath
+    };
+  }
+
+  if (matches.length > 1) {
+    throw new BridgeError("VALIDATION_ERROR", `className resolves to multiple allowed mock classes. Provide classPath instead: ${input.className}`);
+  }
+
+  throw new BridgeError(
+    "UNSAFE_MUTATION",
+    `className could not be resolved inside the allowed project/plugin spawn scope in the mock backend: ${input.className}. Provide classPath for project Blueprint actor classes.`
+  );
+}
+
+function classifyMockSpawnClass(input: { className?: string | undefined; classPath: string }): MockSpawnClassRecord {
+  const nativeEntry = Array.from(MOCK_NATIVE_SPAWN_FAST_PATHS.entries()).find(([, classPath]) => classPath === input.classPath);
+  if (nativeEntry) {
+    return {
+      className: nativeEntry[0],
+      classPath: nativeEntry[1],
+      allowSpawn: true
+    };
+  }
+
+  const registryEntry = MOCK_SPAWN_CLASS_REGISTRY.find((entry) => entry.classPath === input.classPath);
+  if (registryEntry) {
+    return registryEntry;
+  }
+
+  if (input.classPath.startsWith("/Game/")) {
+    return {
+      className: input.className ?? classNameFromPath(input.classPath),
+      classPath: input.classPath,
+      allowSpawn: true
+    };
+  }
+
+  const allowedPrefix = MOCK_ALLOWED_PROJECT_SPAWN_SCOPES.find((scope) => input.classPath.startsWith(`/Script/${scope}.`));
+  if (allowedPrefix) {
+    return {
+      className: input.className ?? classNameFromPath(input.classPath),
+      classPath: input.classPath,
+      allowSpawn: true
+    };
+  }
+
+  return {
+    className: input.className ?? classNameFromPath(input.classPath),
+    classPath: input.classPath,
+    allowSpawn: false,
+    rejectReason: `class is outside the allowed project/plugin spawn scope (${MOCK_ALLOWED_PROJECT_SPAWN_SCOPES.join(", ")}, /Game/*)`
+  };
+}
+
+function classNameFromPath(classPath: string): string {
+  const dotIndex = classPath.lastIndexOf(".");
+  if (dotIndex >= 0 && dotIndex + 1 < classPath.length) {
+    return classPath.slice(dotIndex + 1);
+  }
+
+  const slashIndex = classPath.lastIndexOf("/");
+  if (slashIndex >= 0 && slashIndex + 1 < classPath.length) {
+    return classPath.slice(slashIndex + 1);
+  }
+
+  return classPath;
 }
 
 function makeUniqueActorName(label: string, actors: MockActorRecord[]): string {

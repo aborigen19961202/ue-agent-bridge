@@ -111,16 +111,16 @@ describe("tool definitions", () => {
     const destroyTool = getToolDefinition("ue_destroy_actor_safe");
 
     const spawnArgs = spawnTool?.parseArgs({
-      className: "PointLight",
+      className: "GrapeRachisActor",
       location: { x: 100, y: 200, z: 300 },
       rotation: { pitch: 0, yaw: 90, roll: 0 },
       selectAfterSpawn: true,
-      label: "Spawned Light"
+      label: "Spawned Grape"
     });
     const spawned = await spawnTool?.run(backend, spawnArgs);
     expect(spawned).toMatchObject({
-      actorLabel: "Spawned Light",
-      className: "PointLight",
+      actorLabel: "Spawned Grape",
+      className: "GrapeRachisActor",
       selected: true
     });
 

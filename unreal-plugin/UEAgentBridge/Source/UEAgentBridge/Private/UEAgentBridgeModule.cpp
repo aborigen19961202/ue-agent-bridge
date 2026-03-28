@@ -18,6 +18,7 @@
 #include "HttpServerRequest.h"
 #include "HttpServerResponse.h"
 #include "IHttpRouter.h"
+#include "Interfaces/IPluginManager.h"
 #include "IMessageLogListing.h"
 #include "Kismet2/CompilerResultsLog.h"
 #include "Logging/LogVerbosity.h"
@@ -31,11 +32,13 @@
 #include "Misc/Optional.h"
 #include "Misc/OutputDevice.h"
 #include "Misc/Parse.h"
+#include "ModuleDescriptor.h"
 #include "Misc/ScopeLock.h"
 #include "ImageUtils.h"
 #include "Internationalization/Regex.h"
 #include "RenderingThread.h"
 #include "Serialization/JsonSerializer.h"
+#include "UObject/UObjectIterator.h"
 #include "Containers/StringConv.h"
 #include "Templates/Function.h"
 
@@ -139,7 +142,7 @@ namespace UEAgentBridge
 
 	static const TMap<FString, FString> SafeConsoleCommands = CreateSafeConsoleCommandMap();
 
-	static TMap<FString, FString> CreateSafeSpawnClassPathMap()
+	static TMap<FString, FString> CreatePreferredNativeSpawnClassPathMap()
 	{
 		return {
 			{ TEXT("StaticMeshActor"), TEXT("/Script/Engine.StaticMeshActor") },
@@ -154,31 +157,7 @@ namespace UEAgentBridge
 		};
 	}
 
-	static TSet<FString> CreateSafeSpawnBaseClassSet()
-	{
-		return {
-			TEXT("StaticMeshActor"),
-			TEXT("PointLight"),
-			TEXT("SpotLight"),
-			TEXT("DirectionalLight"),
-			TEXT("SkyLight"),
-			TEXT("CameraActor"),
-			TEXT("PlayerStart"),
-			TEXT("TargetPoint"),
-			TEXT("TriggerBox")
-		};
-	}
-
-	static const TMap<FString, FString> SafeSpawnClassPaths = CreateSafeSpawnClassPathMap();
-	static const TSet<FString> SafeSpawnBaseClasses = CreateSafeSpawnBaseClassSet();
-
-	static FString JoinSafeSpawnClassNames()
-	{
-		TArray<FString> Keys;
-		SafeSpawnClassPaths.GetKeys(Keys);
-		Keys.Sort();
-		return FString::Join(Keys, TEXT(", "));
-	}
+	static const TMap<FString, FString> PreferredNativeSpawnClassPaths = CreatePreferredNativeSpawnClassPathMap();
 
 	static int32 LogRank(const FString& Level)
 	{
@@ -667,8 +646,12 @@ private:
 	FEditorViewportClient* GetActiveEditorViewportClient() const;
 	FString GetCurrentMapPath() const;
 	bool IsEditorWorldReadyForMutation(UWorld*& OutWorld, UEAgentBridge::FEndpointResult& OutError) const;
+	UClass* ResolveActorClassByPath(const FString& ClassPath) const;
+	TSet<FString> GetAllowedSpawnScriptScopes() const;
+	FString JoinAllowedSpawnScriptScopes() const;
+	bool TryResolveSafeSpawnClassByName(const FString& ClassName, UClass*& OutClass, UEAgentBridge::FEndpointResult& OutError) const;
 	bool TryResolveSafeSpawnClass(const FString& ClassName, const FString& ClassPath, UClass*& OutClass, UEAgentBridge::FEndpointResult& OutError) const;
-	bool IsSafeSpawnClass(const UClass& ActorClass) const;
+	bool IsSafeSpawnClass(const UClass& ActorClass, FString* OutReason = nullptr) const;
 	TSharedRef<FJsonObject> BuildActorMutationPayload(const AActor& Actor, bool bIncludeSelected, bool bIncludeTransform) const;
 	AActor* ResolveActorTarget(const FString& ActorName, const FString& ObjectPath) const;
 	void RedrawActiveViewport() const;
@@ -1011,51 +994,175 @@ bool FUEAgentBridgeModule::IsEditorWorldReadyForMutation(UWorld*& OutWorld, UEAg
 	return true;
 }
 
+UClass* FUEAgentBridgeModule::ResolveActorClassByPath(const FString& ClassPath) const
+{
+	UClass* ResolvedClass = FindObject<UClass>(nullptr, *ClassPath);
+	if (!ResolvedClass)
+	{
+		ResolvedClass = LoadObject<UClass>(nullptr, *ClassPath);
+	}
+
+	return ResolvedClass;
+}
+
+TSet<FString> FUEAgentBridgeModule::GetAllowedSpawnScriptScopes() const
+{
+	TSet<FString> Scopes;
+
+	const FString ProjectScope = GetProjectName();
+	if (!ProjectScope.IsEmpty())
+	{
+		Scopes.Add(ProjectScope);
+	}
+
+	for (const TSharedRef<IPlugin>& Plugin : IPluginManager::Get().GetEnabledPlugins())
+	{
+		if (Plugin->GetLoadedFrom() != EPluginLoadedFrom::Project)
+		{
+			continue;
+		}
+
+		if (!Plugin->GetName().IsEmpty())
+		{
+			Scopes.Add(Plugin->GetName());
+		}
+
+		for (const FModuleDescriptor& Module : Plugin->GetDescriptor().Modules)
+		{
+			const FString ModuleName = Module.Name.ToString();
+			if (!ModuleName.IsEmpty())
+			{
+				Scopes.Add(ModuleName);
+			}
+		}
+	}
+
+	return Scopes;
+}
+
+FString FUEAgentBridgeModule::JoinAllowedSpawnScriptScopes() const
+{
+	TArray<FString> Scopes = GetAllowedSpawnScriptScopes().Array();
+	Scopes.Sort();
+	return FString::Join(Scopes, TEXT(", "));
+}
+
+bool FUEAgentBridgeModule::TryResolveSafeSpawnClassByName(const FString& ClassName, UClass*& OutClass, UEAgentBridge::FEndpointResult& OutError) const
+{
+	OutClass = nullptr;
+
+	if (ClassName.IsEmpty())
+	{
+		OutError = UEAgentBridge::FEndpointResult::Error(EHttpServerResponseCodes::BadRequest, TEXT("VALIDATION_ERROR"), TEXT("Spawn-safe requires className or classPath."));
+		return false;
+	}
+
+	if (const FString* PreferredClassPath = UEAgentBridge::PreferredNativeSpawnClassPaths.Find(ClassName))
+	{
+		OutClass = ResolveActorClassByPath(*PreferredClassPath);
+		if (OutClass)
+		{
+			return true;
+		}
+	}
+
+	TArray<UClass*> Matches;
+	for (TObjectIterator<UClass> It; It; ++It)
+	{
+		UClass* Candidate = *It;
+		if (!Candidate || Candidate->GetName() != ClassName)
+		{
+			continue;
+		}
+
+		FString RejectReason;
+		if (IsSafeSpawnClass(*Candidate, &RejectReason))
+		{
+			Matches.Add(Candidate);
+		}
+	}
+
+	if (Matches.Num() == 1)
+	{
+		OutClass = Matches[0];
+		return true;
+	}
+
+	if (Matches.Num() > 1)
+	{
+		TArray<FString> MatchPaths;
+		for (const UClass* Match : Matches)
+		{
+			MatchPaths.Add(Match->GetPathName());
+		}
+
+		MatchPaths.Sort();
+		OutError = UEAgentBridge::FEndpointResult::Error(
+			EHttpServerResponseCodes::BadRequest,
+			TEXT("VALIDATION_ERROR"),
+			FString::Printf(TEXT("className %s resolves to multiple allowed classes. Provide classPath instead. Matches: %s."), *ClassName, *FString::Join(MatchPaths, TEXT(", ")))
+		);
+		return false;
+	}
+
+	const TSet<FString> AllowedScopes = GetAllowedSpawnScriptScopes();
+	for (const FString& Scope : AllowedScopes)
+	{
+		const FString CandidatePath = FString::Printf(TEXT("/Script/%s.%s"), *Scope, *ClassName);
+		if (UClass* Candidate = ResolveActorClassByPath(CandidatePath))
+		{
+			FString RejectReason;
+			if (IsSafeSpawnClass(*Candidate, &RejectReason))
+			{
+				OutClass = Candidate;
+				return true;
+			}
+		}
+	}
+
+	OutError = UEAgentBridge::FEndpointResult::Error(
+		EHttpServerResponseCodes::Forbidden,
+		TEXT("UNSAFE_MUTATION"),
+		FString::Printf(
+			TEXT("className %s could not be resolved inside the allowed project/plugin spawn scope. Allowed native script scopes: %s. Provide classPath for project Blueprint actor classes."),
+			*ClassName,
+			*JoinAllowedSpawnScriptScopes()
+		)
+	);
+	return false;
+}
+
 bool FUEAgentBridgeModule::TryResolveSafeSpawnClass(const FString& ClassName, const FString& ClassPath, UClass*& OutClass, UEAgentBridge::FEndpointResult& OutError) const
 {
 	OutClass = nullptr;
 
-	FString ResolvedClassPath = ClassPath;
-	if (ResolvedClassPath.IsEmpty())
+	if (!ClassPath.IsEmpty())
 	{
-		const FString* AllowlistedClassPath = UEAgentBridge::SafeSpawnClassPaths.Find(ClassName);
-		if (!AllowlistedClassPath)
+		OutClass = ResolveActorClassByPath(ClassPath);
+		if (!OutClass)
 		{
-			OutError = UEAgentBridge::FEndpointResult::Error(
-				EHttpServerResponseCodes::Forbidden,
-				TEXT("UNSAFE_MUTATION"),
-				FString::Printf(TEXT("className is not allowlisted for spawn-safe. Supported className values: %s."), *UEAgentBridge::JoinSafeSpawnClassNames())
-			);
+			OutError = UEAgentBridge::FEndpointResult::Error(EHttpServerResponseCodes::NotFound, TEXT("NOT_FOUND"), FString::Printf(TEXT("Spawn-safe could not resolve actor class %s."), *ClassPath));
 			return false;
 		}
-
-		ResolvedClassPath = *AllowlistedClassPath;
 	}
-
-	OutClass = FindObject<UClass>(nullptr, *ResolvedClassPath);
-	if (!OutClass)
+	else if (!TryResolveSafeSpawnClassByName(ClassName, OutClass, OutError))
 	{
-		OutClass = LoadObject<UClass>(nullptr, *ResolvedClassPath);
-	}
-
-	if (!OutClass)
-	{
-		OutError = UEAgentBridge::FEndpointResult::Error(EHttpServerResponseCodes::NotFound, TEXT("NOT_FOUND"), FString::Printf(TEXT("Spawn-safe could not resolve actor class %s."), *ResolvedClassPath));
 		return false;
 	}
 
 	if (!OutClass->IsChildOf(AActor::StaticClass()))
 	{
-		OutError = UEAgentBridge::FEndpointResult::Error(EHttpServerResponseCodes::Forbidden, TEXT("UNSAFE_MUTATION"), TEXT("Spawn-safe only allows actor classes."));
+		OutError = UEAgentBridge::FEndpointResult::Error(EHttpServerResponseCodes::Forbidden, TEXT("UNSAFE_MUTATION"), TEXT("Spawn-safe only allows AActor subclasses."));
 		return false;
 	}
 
-	if (!IsSafeSpawnClass(*OutClass))
+	FString RejectReason;
+	if (!IsSafeSpawnClass(*OutClass, &RejectReason))
 	{
 		OutError = UEAgentBridge::FEndpointResult::Error(
 			EHttpServerResponseCodes::Forbidden,
 			TEXT("UNSAFE_MUTATION"),
-			FString::Printf(TEXT("Resolved class %s is outside the spawn-safe allowlist. Only allowlisted native editor classes are supported."), *OutClass->GetPathName())
+			FString::Printf(TEXT("Resolved class %s is not allowed for spawn-safe: %s."), *OutClass->GetPathName(), *RejectReason)
 		);
 		return false;
 	}
@@ -1063,28 +1170,88 @@ bool FUEAgentBridgeModule::TryResolveSafeSpawnClass(const FString& ClassName, co
 	return true;
 }
 
-bool FUEAgentBridgeModule::IsSafeSpawnClass(const UClass& ActorClass) const
+bool FUEAgentBridgeModule::IsSafeSpawnClass(const UClass& ActorClass, FString* OutReason) const
 {
-	const FString ClassPath = ActorClass.GetPathName();
-	if (!ClassPath.StartsWith(TEXT("/Script/")))
+	auto Reject = [&OutReason](const FString& Reason)
 	{
-		return false;
-	}
+		if (OutReason)
+		{
+			*OutReason = Reason;
+		}
 
-	if (UEAgentBridge::SafeSpawnClassPaths.FindKey(ClassPath) != nullptr)
+		return false;
+	};
+
+	const FString ClassPath = ActorClass.GetPathName();
+	const FString PackagePath = ActorClass.GetOutermost() ? ActorClass.GetOutermost()->GetName() : FString();
+	if (UEAgentBridge::PreferredNativeSpawnClassPaths.FindKey(ClassPath) != nullptr)
 	{
+		if (OutReason)
+		{
+			OutReason->Empty();
+		}
+
 		return true;
 	}
 
-	for (const UClass* CurrentClass = &ActorClass; CurrentClass; CurrentClass = CurrentClass->GetSuperClass())
+	if (!ActorClass.IsChildOf(AActor::StaticClass()))
 	{
-		if (UEAgentBridge::SafeSpawnBaseClasses.Contains(CurrentClass->GetName()))
-		{
-			return CurrentClass->GetPathName().StartsWith(TEXT("/Script/"));
-		}
+		return Reject(TEXT("class is not an AActor subclass"));
 	}
 
-	return false;
+	if (ActorClass.HasAnyClassFlags(CLASS_Abstract))
+	{
+		return Reject(TEXT("class is abstract"));
+	}
+
+	if (ActorClass.HasAnyClassFlags(CLASS_Deprecated | CLASS_NewerVersionExists))
+	{
+		return Reject(TEXT("class is deprecated"));
+	}
+
+	if (ActorClass.HasAnyClassFlags(CLASS_Transient))
+	{
+		return Reject(TEXT("class is transient-only"));
+	}
+
+	if (ActorClass.HasAnyClassFlags(CLASS_NotPlaceable))
+	{
+		return Reject(TEXT("class is not placeable in the editor world"));
+	}
+
+	if (PackagePath.StartsWith(TEXT("/Game/")))
+	{
+		if (OutReason)
+		{
+			OutReason->Empty();
+		}
+
+		return true;
+	}
+
+	static const FString ScriptPrefix = TEXT("/Script/");
+	if (!PackagePath.StartsWith(ScriptPrefix))
+	{
+		return Reject(TEXT("class is outside the allowed project/plugin spawn scope"));
+	}
+
+	const FString ScriptScope = PackagePath.RightChop(ScriptPrefix.Len());
+	if (ScriptScope.IsEmpty())
+	{
+		return Reject(TEXT("class does not expose a valid script scope"));
+	}
+
+	if (!GetAllowedSpawnScriptScopes().Contains(ScriptScope))
+	{
+		return Reject(FString::Printf(TEXT("class is outside the allowed project/plugin spawn scope (%s)"), *JoinAllowedSpawnScriptScopes()));
+	}
+
+	if (OutReason)
+	{
+		OutReason->Empty();
+	}
+
+	return true;
 }
 
 AActor* FUEAgentBridgeModule::ResolveActorTarget(const FString& ActorName, const FString& ObjectPath) const
@@ -1628,7 +1795,7 @@ UEAgentBridge::FEndpointResult FUEAgentBridgeModule::BuildSpawnActorResult(const
 	AActor* const SpawnedActor = World->SpawnActor<AActor>(ActorClass, Location, Rotation, SpawnParameters);
 	if (!SpawnedActor)
 	{
-		return UEAgentBridge::FEndpointResult::Error(EHttpServerResponseCodes::ServerError, TEXT("INTERNAL_ERROR"), TEXT("Unreal failed to spawn the allowlisted actor class."));
+		return UEAgentBridge::FEndpointResult::Error(EHttpServerResponseCodes::ServerError, TEXT("INTERNAL_ERROR"), TEXT("Unreal failed to spawn the requested actor class."));
 	}
 
 #if WITH_EDITOR
@@ -1700,9 +1867,14 @@ UEAgentBridge::FEndpointResult FUEAgentBridgeModule::BuildDestroyActorResult(con
 		return UEAgentBridge::FEndpointResult::Error(EHttpServerResponseCodes::NotFound, TEXT("NOT_FOUND"), TEXT("Target actor was not found in the current editor world."));
 	}
 
-	if (!IsSafeSpawnClass(*Actor->GetClass()))
+	FString RejectReason;
+	if (!IsSafeSpawnClass(*Actor->GetClass(), &RejectReason))
 	{
-		return UEAgentBridge::FEndpointResult::Error(EHttpServerResponseCodes::Forbidden, TEXT("UNSAFE_MUTATION"), TEXT("Destroy-safe only supports actors whose classes are within the spawn-safe allowlist."));
+		return UEAgentBridge::FEndpointResult::Error(
+			EHttpServerResponseCodes::Forbidden,
+			TEXT("UNSAFE_MUTATION"),
+			FString::Printf(TEXT("Destroy-safe only supports actors inside the allowed project/plugin spawn scope: %s."), *RejectReason)
+		);
 	}
 
 	const TSharedRef<FJsonObject> Payload = BuildActorMutationPayload(*Actor, false, false);

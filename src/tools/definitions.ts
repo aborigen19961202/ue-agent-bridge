@@ -455,7 +455,7 @@ export const toolDefinitions: ToolDefinition<unknown>[] = [
   }),
   define<SpawnActorInput>({
     name: "ue_spawn_actor_safe",
-    description: "Spawn one allowlisted actor class into the editor world at an explicit transform. This is a bounded editor mutation and rejects non-allowlisted classes or non-editor contexts.",
+    description: "Spawn one actor into the editor world at an explicit transform. This bounded mutation supports safe project and project-plugin actor classes, plus a small native fast-path, and rejects out-of-scope, abstract, or non-actor classes.",
     inputSchema: {
       type: "object",
       properties: {
@@ -525,7 +525,7 @@ export const toolDefinitions: ToolDefinition<unknown>[] = [
   }),
   define<DestroyActorInput>({
     name: "ue_destroy_actor_safe",
-    description: "Destroy one targeted actor in the editor world. This is intentionally narrow and rejects actors outside the safe mutation policy.",
+    description: "Destroy one targeted actor in the editor world. This stays intentionally narrow and only permits actors whose classes remain inside the safe spawn/mutation policy.",
     inputSchema: {
       type: "object",
       properties: {

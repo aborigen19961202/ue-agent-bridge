@@ -23,7 +23,7 @@ Use this skill when a repository already has `UEAgentBridge` installed or when t
 - Prefer reads before writes.
 - Verify narrow writes after mutation when practical.
 - Do not invent raw console strings or arbitrary Unreal execution paths.
-- Treat editor mutations as allowlist-only tools, not as a fallback to generic editor control.
+- Treat editor mutations as policy-controlled tools, not as a fallback to generic editor control.
 
 ## Choose The Right Surface
 
@@ -63,9 +63,9 @@ For the implemented tool surface and the correct source-of-truth rules, read:
 - Do not treat Unreal as a hidden shell.
 - Do not use generic command execution.
 - Do not broaden named bridge tools into ad hoc editor control.
-- Use `ue_spawn_actor_safe` only for allowlisted native actor classes at an explicit transform.
+- Use `ue_spawn_actor_safe` only for actor classes inside the safe project/plugin spawn scope, or the small native fast-path, at an explicit transform.
 - Use `ue_select_actor_safe` when follow-up tools need a concrete selected actor instead of a UI hack.
-- Use `ue_destroy_actor_safe` only for targeted cleanup of actors that stay inside the safe mutation policy.
+- Use `ue_destroy_actor_safe` only for targeted cleanup of actors that stay inside the safe spawn/mutation policy.
 - Do not use spawn-safe as a backdoor for Blueprint construction scripts or arbitrary object creation.
 - Do not trust Unreal-side diagnostics over external compiler output for failed C++ builds.
 - If `ue_healthcheck` reports missing readiness, stop improvising around the missing capability.
