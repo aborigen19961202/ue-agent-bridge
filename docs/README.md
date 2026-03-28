@@ -2,6 +2,8 @@
 
 Project documentation is grouped by purpose instead of living in the repository root.
 
+If you are new to the project, start with the `Guides` section first. The `Contracts`, `Planning`, and `Archive` sections are primarily for maintainers and deeper implementation context.
+
 ## Guides
 
 - [AGENT_PLAYBOOK.md](./guides/AGENT_PLAYBOOK.md)

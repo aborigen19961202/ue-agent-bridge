@@ -405,11 +405,16 @@ This project is released under the [MIT License](./LICENSE).
 
 ## Documentation
 
-Documentation is grouped under [`docs/`](./docs/README.md):
+Most users only need the core guides:
 
-- guides: [AGENT_PLAYBOOK.md](./docs/guides/AGENT_PLAYBOOK.md), [CPP_ITERATION_WORKFLOW.md](./docs/guides/CPP_ITERATION_WORKFLOW.md), [PLUGIN_RUNBOOK.md](./docs/guides/PLUGIN_RUNBOOK.md), [THIRD_PARTY_INSTALL.md](./docs/guides/THIRD_PARTY_INSTALL.md), [CLIENT_INTEGRATION.md](./docs/guides/CLIENT_INTEGRATION.md)
-- integrations: [AGENT_PACKAGE_STRATEGY.md](./docs/integrations/AGENT_PACKAGE_STRATEGY.md), [AGENT_PACKAGE_INSTALL.md](./docs/integrations/AGENT_PACKAGE_INSTALL.md)
-- release: [RELEASE_CHECKLIST.md](./docs/release/RELEASE_CHECKLIST.md), [GITHUB_PUBLISH_CHECKLIST.md](./docs/release/GITHUB_PUBLISH_CHECKLIST.md), [FAB_RELEASE_READINESS.md](./docs/release/FAB_RELEASE_READINESS.md), [SAFE_MUTATION_VERIFICATION.md](./docs/release/SAFE_MUTATION_VERIFICATION.md)
-- contracts: [M1_PLUGIN_CONTRACT.md](./docs/contracts/M1_PLUGIN_CONTRACT.md), [REMOTE_CONTROL_CONTRACT.md](./docs/contracts/REMOTE_CONTROL_CONTRACT.md), [SELECTED_ACTORS_HELPER_CONTRACT.md](./docs/contracts/SELECTED_ACTORS_HELPER_CONTRACT.md), [OUTPUT_LOG_HELPER_CONTRACT.md](./docs/contracts/OUTPUT_LOG_HELPER_CONTRACT.md), [CONSOLE_COMMAND_HELPER_CONTRACT.md](./docs/contracts/CONSOLE_COMMAND_HELPER_CONTRACT.md)
-- planning: [M1_BACKLOG.md](./docs/planning/M1_BACKLOG.md), [M1_PLUGIN_FIRST_PLAN.md](./docs/planning/M1_PLUGIN_FIRST_PLAN.md), [M1_PLUGIN_IMPLEMENTATION_ORDER.md](./docs/planning/M1_PLUGIN_IMPLEMENTATION_ORDER.md)
-- archive: [PROJECT_FRAMING.md](./docs/archive/PROJECT_FRAMING.md), [M0_SCOPE.md](./docs/archive/M0_SCOPE.md), [DECISIONS.md](./docs/archive/DECISIONS.md), [AGENT_USAGE_MODEL.md](./docs/archive/AGENT_USAGE_MODEL.md), [UNREAL_EXPOSURE_PLAN.md](./docs/archive/UNREAL_EXPOSURE_PLAN.md), [IMPLEMENTATION_ORDER.md](./docs/archive/IMPLEMENTATION_ORDER.md), [REFERENCE_REPOS.md](./docs/archive/REFERENCE_REPOS.md)
+- [AGENT_PLAYBOOK.md](./docs/guides/AGENT_PLAYBOOK.md)
+- [CPP_ITERATION_WORKFLOW.md](./docs/guides/CPP_ITERATION_WORKFLOW.md)
+- [PLUGIN_RUNBOOK.md](./docs/guides/PLUGIN_RUNBOOK.md)
+- [THIRD_PARTY_INSTALL.md](./docs/guides/THIRD_PARTY_INSTALL.md)
+- [CLIENT_INTEGRATION.md](./docs/guides/CLIENT_INTEGRATION.md)
+
+Full documentation index:
+
+- [docs/README.md](./docs/README.md)
+
+Internal planning, contracts, release checklists, and historical documents remain available there, including [`docs/archive/`](./docs/archive/PROJECT_FRAMING.md).
